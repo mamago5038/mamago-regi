@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>クリーニング受付 現場対応版 Vol.23</title>
+    <title>クリーニング受付 現場対応版 Vol.24</title>
     <style>
         :root { --main-green: #4a7c59; --light-green: #eef5f0; --border-color: #c8d6cc; --danger: #c0392b; --text-dark: #2c3e50; --bg-gray: #f4f7f5; --edit-orange: #e67e22; }
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: calc(30px + env(safe-area-inset-bottom)); box-sizing: border-box; }
@@ -108,7 +108,7 @@
 </head>
 <body>
 <div class="container">
-    <h2>☁️ ママ号クラウドレジ Vol.23</h2>
+    <h2>☁️ ママ号クラウドレジ Vol.24</h2>
     <div class="status-customer-panel">
         <div class="panel-top">
             <div class="panel-clock-staff">
@@ -283,12 +283,16 @@
         if (cart.length === 1) { tagRangeString = startP + "-" + startC; } else if (startP === endP) { tagRangeString = startP + "-" + startC + " 〜 " + endC; } else { tagRangeString = startP + "-" + startC + " 〜 " + endP + "-" + endC; }
         globalTagParent = finalP; globalTagChild = finalC; localStorage.setItem('tagParent', globalTagParent); localStorage.setItem('tagChild', globalTagChild);
         var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); var currentOrderId = editingOrderId;
+        
         if (editingOrderId) {
             var idx = -1; for(var j=0; j<salesHistory.length; j++) { if(salesHistory[j].id === editingOrderId) idx = j; }
             if (idx > -1) { salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = itemsSummary.join(' / '); }
         } else {
-            currentOrderId = 'ORD-' + Date.now(); salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived = (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
+            currentOrderId = 'ORD-' + Date.now(); 
+            // 🚨 ここが直りました！！！ 🚨
+            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
         }
+        
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
         var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
@@ -329,9 +333,9 @@
     
     function sendDailyReportToSpreadsheet() {
         var targetDate = document.getElementById('reportDatePicker').value; var memo = document.getElementById('reportDailyMemo').value.trim(); var sales = document.getElementById('repTotalSales').innerText.replace(/,/g, ''); var qty = document.getElementById('repTotalItems').innerText; var count = document.getElementById('repCustomerCount').innerText; var staff = document.getElementById('staffNameInput').value.trim() || '未設定';
-        var credit = document.getElementById('repTotalCredit').innerText.replace(/,/g, ''); // 👈 未収金（貸し）を取得！
+        var credit = document.getElementById('repTotalCredit').innerText.replace(/,/g, '');
         
-        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, staffName: staff, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, creditAmount: parseInt(credit) || 0, dailyMemo: memo }; // 👈 payloadに追加！
+        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, staffName: staff, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, creditAmount: parseInt(credit) || 0, dailyMemo: memo };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) {
             fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(reportPayload) }).catch(function(e) {});
             alert("本日（" + targetDate + "）の集計データをスプレッドシートに送信しました！"); closeReportModal();

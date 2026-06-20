@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>クリーニング受付 現場対応版 Vol.24</title>
+    <title>クリーニング受付 現場対応版 Vol.25</title>
     <style>
         :root { --main-green: #4a7c59; --light-green: #eef5f0; --border-color: #c8d6cc; --danger: #c0392b; --text-dark: #2c3e50; --bg-gray: #f4f7f5; --edit-orange: #e67e22; }
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: calc(30px + env(safe-area-inset-bottom)); box-sizing: border-box; }
@@ -108,7 +108,7 @@
 </head>
 <body>
 <div class="container">
-    <h2>☁️ ママ号クラウドレジ Vol.24</h2>
+    <h2>☁️ ママ号クラウドレジ Vol.25</h2>
     <div class="status-customer-panel">
         <div class="panel-top">
             <div class="panel-clock-staff">
@@ -137,7 +137,17 @@
 <div id="checkoutModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="checkoutModalTitle">💰 受付・お会計確定</div><div class="checkout-total-box"><div id="checkoutQty" style="font-weight:bold; color:#2d5a27;">お預かり: 0点</div><div style="font-size:0.9rem; color:#555; font-weight:bold; margin-top:5px;">合計請求金額 (税込)</div><div class="checkout-total-amount">¥<span id="checkoutTotalPrice">0</span></div></div><div class="payment-toggle"><div id="pay-now" class="pay-btn selected" onclick="setPaymentType('now')">👇 今すぐお支払い<br><small>(前金)</small></div><div id="pay-later" class="pay-btn" onclick="setPaymentType('later')">📦 仕上がり時払い<br><small>(後金・貸し)</small></div></div><button id="checkoutConfirmBtn" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.15rem;" onclick="submitOrder()">✅ 受付を確定する</button><div class="cancel-link" onclick="closeCheckoutModal()">やり直す（戻る）</div></div></div>
 <div id="customModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">✍️ 特殊品・手入力</div><label style="font-size:0.85rem; font-weight:bold;">商品名:</label><input type="text" id="customItemName" class="modal-text-input" style="margin-bottom:12px;" placeholder="例: 特大ジュータン"><label style="font-size:0.85rem; font-weight:bold;">金額 (税込):</label><input type="number" id="customItemPrice" class="modal-text-input" style="margin-bottom:15px;"><button class="btn btn-primary" style="width:100%; padding:14px;" onclick="addCustomItem()">選択画面へ進む</button><div class="cancel-link" onclick="closeCustomModal()">キャンセル</div></div></div>
 <div id="customerModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">📱 顧客名簿</div><div class="history-list-box" id="customerListContainer" style="max-height:250px;"></div><div class="cancel-link" onclick="closeCustomerModal()">閉じる</div></div></div>
-<div id="reportModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">📊 日次集計レポート</div><div style="margin-bottom:12px; text-align: center;"><input type="date" id="reportDatePicker" onchange="calculateReport()" style="padding:8px; font-size:1rem; border:1px solid #cbd5ce; border-radius:6px;"></div><div class="report-grid"><div class="report-card total"><div class="report-label">① 本日の売上合計 (税込)</div><div class="report-val">¥<span id="repTotalSales">0</span></div></div><div class="report-card"><div class="report-label">② 総お預かり点数</div><div class="report-val" style="color:#000;"><span id="repTotalItems">0</span> 点</div></div><div class="report-card"><div class="report-label">③ 受付客数</div><div class="report-val" style="color:#000;"><span id="repCustomerCount">0</span> 名</div></div><div class="report-card"><div class="report-label">入金高 (前金)</div><div class="report-val" style="color:#2e7d32; font-size:1.2rem;">¥<span id="repTotalCash">0</span></div></div><div class="report-card"><div class="report-label">売掛金 (後金)</div><div class="report-val" style="color:#c0392b; font-size:1.2rem;">¥<span id="repTotalCredit">0</span></div></div></div><div class="modal-section-title">📝 本日の業務日報・メモ</div><textarea id="reportDailyMemo" class="modal-text-input" rows="3" placeholder="例：〇〇様、次回布団の集配希望。" style="resize:none; margin-bottom:15px; font-family:inherit;"></textarea><button class="btn btn-primary" style="width:100%; background:#2c3e50; margin-bottom:10px; padding:14px;" onclick="sendDailyReportToSpreadsheet()">📊 本日の集計を送信して締める</button><button class="btn btn-secondary" onclick="closeReportModal()" style="width:100%;">閉じる</button></div></div>
+
+<div id="reportModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">📊 日次集計レポート</div><div style="margin-bottom:12px; text-align: center;"><input type="date" id="reportDatePicker" onchange="calculateReport()" style="padding:8px; font-size:1rem; border:1px solid #cbd5ce; border-radius:6px;"></div>
+        <div class="report-grid">
+            <div class="report-card total"><div class="report-label">① 本日の売上合計 (税込)</div><div class="report-val">¥<span id="repTotalSales">0</span></div></div>
+            <div class="report-card"><div class="report-label">② 総お預かり点数</div><div class="report-val" style="color:#000;"><span id="repTotalItems">0</span> 点</div></div>
+            <div class="report-card"><div class="report-label">③ 受付客数</div><div class="report-val" style="color:#000;"><span id="repCustomerCount">0</span> 名</div></div>
+            <div class="report-card"><div class="report-label">入金高 (前金)</div><div class="report-val" style="color:#2e7d32; font-size:1.2rem;">¥<span id="repTotalCash">0</span></div></div>
+            <div class="report-card"><div class="report-label">売掛金 (後金)</div><div class="report-val" style="color:#c0392b; font-size:1.2rem;">¥<span id="repTotalCredit">0</span></div></div>
+            <div class="report-card total"><div class="report-label">④ 本日の使用タグ範囲 (自動計算)</div><div class="report-val" style="font-size:1.2rem; color:#d35400;"><span id="repTagRange">なし</span></div></div>
+        </div>
+        <div class="modal-section-title">📝 本日の業務日報・メモ</div><textarea id="reportDailyMemo" class="modal-text-input" rows="3" placeholder="例：〇〇様、次回布団の集配希望。" style="resize:none; margin-bottom:15px; font-family:inherit;"></textarea><button class="btn btn-primary" style="width:100%; background:#2c3e50; margin-bottom:10px; padding:14px;" onclick="sendDailyReportToSpreadsheet()">📊 本日の集計を送信して締める</button><button class="btn btn-secondary" onclick="closeReportModal()" style="width:100%;">閉じる</button></div></div>
 
 <script>
     var url_part1 = "https://script.google.com/macros/s/";
@@ -157,7 +167,7 @@
         "kotatsu": { title: "🛏️ こたつ・毛布", items: [{name: "こたつ布団(正方形·掛)", price: 1500}, {name: "こたつ布団(正方形·敷)", price: 1300}, {name: "こたつ布団(長方形·掛)", price: 2000}, {name: "こたつ布団(長方形·敷)", price: 1600}, {name: "タオルケット/綿毛布 S", price: 600}, {name: "タオルケット/綿毛布 W", price: 900}, {name: "毛布 S (1枚物)", price: 700}, {name: "毛布 W (1枚物)", price: 900}, {name: "毛布 S (合わせ)", price: 900}, {name: "毛布 W (合わせ)", price: 1700}, {name: "ベビー毛布・ひざ掛け", price: 400}, {name: "毛布丹前", price: 800}, {name: "毛布布団 S", price: 2500}, {name: "毛布布団 W", price: 3000}, {name: "電気毛布", price: 1500}, {name: "ベッドパット S", price: 1100}, {name: "ベッドパット W", price: 1600}, {name: "肌掛布団", price: 800}, {name: "寝袋(ダウン)", price: 2100}, {name: "敷パット/敷毛布 S", price: 700}, {name: "敷パット/敷毛布 W", price: 900}, {name: "敷毛布 綿入り S", price: 1000}, {name: "敷毛布 綿入り W", price: 1300}] },
         "sheets": { title: "🪑 シーツ・カバー", items: [{name: "イスカバー(小)", price: 450}, {name: "イスカバー(中)", price: 550}, {name: "イスカバー(大)", price: 650}, {name: "テーブルクロス(綿)", price: 450}, {name: "テーブルクロス(レース)", price: 500}, {name: "カーテン(ウール)", price: 850}, {name: "レースカーテン", price: 750}, {name: "紅白幕(2m×2m)", price: 1100}, {name: "のぼり(180x60)", price: 500}, {name: "掛布団側", price: 700}, {name: "敷布団側", price: 650}, {name: "のれん", price: 300}, {name: "シーツ S", price: 350}, {name: "シーツ W", price: 600}, {name: "タオル・ボアシーツ S", price: 400}, {name: "タオル・ボアシーツ W", price: 650}, {name: "布団カバー S", price: 450}, {name: "布団カバー W", price: 650}, {name: "枕カバー", price: 200}, {name: "座布団カバー(白)", price: 200}, {name: "座布団カバー(色柄)", price: 250}, {name: "シートカバー", price: 250}, {name: "チャイルドシートカバー", price: 550}, {name: "マルチカバー(正方形)", price: 850}, {name: "マルチカバー(長方形)", price: 1100}, {name: "鏡", price: 650}] },
         "school": { title: "🎒 学生服・作業着", items: [{name: "学生服(ツメエリ)", price: 600}, {name: "学生ズボン", price: 500}, {name: "セーラー服(夏・冬)", price: 500}, {name: "学生ヒダスカート", price: 550}, {name: "学生スカーフ", price: 150}, {name: "ボウタイ", price: 150}, {name: "はちまき", price: 150}, {name: "ユニフォーム(上)", price: 400}, {name: "ユニフォーム(下)", price: 350}, {name: "ジャージ(上)", price: 400}, {name: "ジャージ(下)", price: 350}, {name: "柔道着(上)", price: 600}, {name: "柔道着(下)", price: 400}, {name: "柔道着(帯)", price: 200}, {name: "剣道着(上)", price: 600}, {name: "剣道着(袴)", price: 1100}, {name: "まわし", price: 1300}, {name: "作業着", price: 400}, {name: "作業ズボン", price: 450}, {name: "作業シャツ", price: 350}, {name: "作業ツナギ", price: 600}, {name: "防寒ツナギ", price: 1200}, {name: "白衣(ワンピース)", price: 400}, {name: "白衣(長)", price: 350}, {name: "白衣(半)", price: 250}, {name: "白衣(コック用)", price: 300}, {name: "エプロン", price: 250}, {name: "前かけ", price: 200}, {name: "かっぽう着", price: 300}, {name: "白ズボン", price: 350}, {name: "ナースキャップ", price: 250}, {name: "三角巾", price: 150}, {name: "ハンチング・ベレー帽", price: 350}, {name: "野球帽・登山帽", price: 350}, {name: "毛糸帽", price: 300}, {name: "コック帽(長)", price: 350}, {name: "コック帽(短)", price: 300}, {name: "白帽子", price: 300}, {name: "警察帽子", price: 400}] },
-        "matsuri": { title: "🏮 祭り物・浴衣", items: [{name: "さらし(一反)", price: 450}, {name: "足袋(白・黒・柄)", price: 350}, {name: "地下足袋", price: 500}, {name: "祭り用浴衣", price: 600}, {name: "色浴衣", price: 1000}, {name: "綿入半天", price: 750}, {name: "半天(袖なし)", price: 550}, {name: "半天(大)", price: 550}, {name: "半天(中)", price: 500}, {name: "半天(小)", price: 350}, {name: "半天(ひも)", price: 150}, {name: "おこし", price: 300}, {name: "たすき", price: 250}, {name: "しごき", price: 250}, {name: "帯(祭り用)", price: 350}, {name: "腹巻(伊達巻)", price: 350}, {name: "腹あて(三角)", price: 300}, {name: "またひき", price: 450}, {name: "鯉のぼり(3mセット)", price: 3100}, {name: "鯉のぼり(5mセット)", price: 5100}, {name: "和装 肌着(上)", price: 300}, {name: "和装 オコシ(下)", price: 300}, {name: "和装 長肌着", price: 500}, {name: "丹前下", price: 500}, {name: "丹前(綿入り)", price: 1600}, {name: "丹前(ウール)", price: 1100}, {name: "パジャマ(上・下)", price: 550}, {name: "パジャマ(シルク上下)", price: 650}, {name: "ケープ", price: 400}, {name: "肌着(らくだ)", price: 400}, {name: "ももひき(らくだ)", price: 400}, {name: "ガウン(目安)", price: 850}, {name: "おくるみ", price: 500}, {name: "ねんねこ", price: 1600}, {name: "ベビードレス(帽子)", price: 550}, {name: "亀甲(冬用)", price: 500}, {name: "亀甲(夏用)", price: 450}] },
+        "matsuri": { title: "🏮 祭り物・浴衣", items: [{name: "さらし(一反)", price: 450}, {name: "足袋(白・黒・柄)", price: 350}, {name: "地下足袋", price: 500}, {name: "祭り用浴衣", price: 600}, {name: "色浴衣", price: 1000}, {name: "綿入半天", price: 750}, {name: "半天(袖なし)", price: 550}, {name: "半天(大)", price: 550}, {name: "半天(中)", price: 500}, {name: "半天(小)", price: 350}, {name: "半天(ひひも)", price: 150}, {name: "おこし", price: 300}, {name: "たすき", price: 250}, {name: "しごき", price: 250}, {name: "帯(祭り用)", price: 350}, {name: "腹巻(伊達巻)", price: 350}, {name: "腹あて(三角)", price: 300}, {name: "またひき", price: 450}, {name: "鯉のぼり(3mセット)", price: 3100}, {name: "鯉のぼり(5mセット)", price: 5100}, {name: "和装 肌着(上)", price: 300}, {name: "和装 オコシ(下)", price: 300}, {name: "和装 長肌着", price: 500}, {name: "丹前下", price: 500}, {name: "丹前(綿入り)", price: 1600}, {name: "丹前(ウール)", price: 1100}, {name: "パジャマ(上・下)", price: 550}, {name: "パジャマ(シルク上下)", price: 650}, {name: "ケープ", price: 400}, {name: "肌着(らくだ)", price: 400}, {name: "ももひき(らくだ)", price: 400}, {name: "ガウン(目安)", price: 850}, {name: "おくるみ", price: 500}, {name: "ねんねこ", price: 1600}, {name: "ベビードレス(帽子)", price: 550}, {name: "亀甲(冬用)", price: 500}, {name: "亀甲(夏用)", price: 450}] },
         "others": { title: "✨ 小物・加工", items: [{name: "ネクタイ", price: 350}, {name: "スコットタイ", price: 350}, {name: "マフラー", price: 350}, {name: "スカーフ", price: 400}, {name: "ストール", price: 450}, {name: "ソックス", price: 250}, {name: "手拭い", price: 150}, {name: "バスタオル", price: 250}, {name: "フェイスタオル", price: 150}, {name: "仏敷", price: 1000}, {name: "防水・撥水加工", price: 550}, {name: "付属品1点につき", price: 50}, {name: "りぼん", price: 50}, {name: "ベルト", price: 50}, {name: "フード", price: 50}, {name: "ダウンフード", price: 200}, {name: "ライナー", price: 100}, {name: "ダウンライナー(袖無)", price: 500}, {name: "ファー(アクリル系)", price: 50}, {name: "ファー(ラビット等)", price: 500}, {name: "裏付(+)", price: 50}, {name: "ロング(+)", price: 200}, {name: "ワンピースプリーツ(+)", price: 300}, {name: "のり強目", price: 50}, {name: "のりなし", price: 50}, {name: "漂白", price: 100}] }
     };
 
@@ -283,16 +293,12 @@
         if (cart.length === 1) { tagRangeString = startP + "-" + startC; } else if (startP === endP) { tagRangeString = startP + "-" + startC + " 〜 " + endC; } else { tagRangeString = startP + "-" + startC + " 〜 " + endP + "-" + endC; }
         globalTagParent = finalP; globalTagChild = finalC; localStorage.setItem('tagParent', globalTagParent); localStorage.setItem('tagChild', globalTagChild);
         var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); var currentOrderId = editingOrderId;
-        
         if (editingOrderId) {
             var idx = -1; for(var j=0; j<salesHistory.length; j++) { if(salesHistory[j].id === editingOrderId) idx = j; }
             if (idx > -1) { salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = itemsSummary.join(' / '); }
         } else {
-            currentOrderId = 'ORD-' + Date.now(); 
-            // 🚨 ここが直りました！！！ 🚨
-            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
+            currentOrderId = 'ORD-' + Date.now(); salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
         }
-        
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
         var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
@@ -324,18 +330,41 @@
     function openReportModal() { calculateReport(); document.getElementById('reportModal').style.display = 'flex'; }
     function closeReportModal() { document.getElementById('reportModal').style.display = 'none'; }
     
+    // 🌟 タグ範囲を履歴から自動抽出するロジックを追加！
     function calculateReport() {
         var targetDate = document.getElementById('reportDatePicker').value; var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
         var tSales = 0; var tCash = 0; var tCredit = 0; var cCount = 0; var tItems = 0;
-        salesHistory.forEach(function(r) { if (r.date === targetDate) { tSales += r.totalSales; tCash += (r.cashReceived || 0); tCredit += (r.creditAmount || 0); if (r.status !== "取消") cCount++; tItems += (r.totalQty || 0); } });
+        var validTags = [];
+        
+        salesHistory.forEach(function(r) { 
+            if (r.date === targetDate) { 
+                tSales += r.totalSales; tCash += (r.cashReceived || 0); tCredit += (r.creditAmount || 0); 
+                if (r.status !== "取消") {
+                    cCount++; 
+                    tItems += (r.totalQty || 0);
+                    if (r.tagNumber) validTags.push(r.tagNumber);
+                }
+            } 
+        });
+        
+        var tagRangeStr = "なし";
+        if (validTags.length > 0) {
+            var firstOrderTag = validTags[0].split(" 〜 ")[0];
+            var lastOrderTag = validTags[validTags.length - 1].split(" 〜 ").pop();
+            if (firstOrderTag === lastOrderTag) { tagRangeStr = firstOrderTag; } 
+            else { tagRangeStr = firstOrderTag + " 〜 " + lastOrderTag; }
+        }
+        
         document.getElementById('repTotalSales').innerText = tSales.toLocaleString(); document.getElementById('repTotalCash').innerText = tCash.toLocaleString(); document.getElementById('repTotalCredit').innerText = tCredit.toLocaleString(); document.getElementById('repCustomerCount').innerText = cCount; document.getElementById('repTotalItems').innerText = tItems;
+        document.getElementById('repTagRange').innerText = tagRangeStr; // 👈 画面にセット！
     }
     
     function sendDailyReportToSpreadsheet() {
         var targetDate = document.getElementById('reportDatePicker').value; var memo = document.getElementById('reportDailyMemo').value.trim(); var sales = document.getElementById('repTotalSales').innerText.replace(/,/g, ''); var qty = document.getElementById('repTotalItems').innerText; var count = document.getElementById('repCustomerCount').innerText; var staff = document.getElementById('staffNameInput').value.trim() || '未設定';
         var credit = document.getElementById('repTotalCredit').innerText.replace(/,/g, '');
+        var tagRange = document.getElementById('repTagRange').innerText; // 👈 自動計算されたタグ範囲を取得！
         
-        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, staffName: staff, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, creditAmount: parseInt(credit) || 0, dailyMemo: memo };
+        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, staffName: staff, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, creditAmount: parseInt(credit) || 0, tagRange: tagRange, dailyMemo: memo };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) {
             fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(reportPayload) }).catch(function(e) {});
             alert("本日（" + targetDate + "）の集計データをスプレッドシートに送信しました！"); closeReportModal();

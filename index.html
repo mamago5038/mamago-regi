@@ -5,25 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>クリーニング受付 現場対応版 Vol.21</title>
+    <title>クリーニング受付 現場対応版 Vol.22</title>
     <style>
         :root { --main-green: #4a7c59; --light-green: #eef5f0; --border-color: #c8d6cc; --danger: #c0392b; --text-dark: #2c3e50; --bg-gray: #f4f7f5; --edit-orange: #e67e22; }
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: calc(30px + env(safe-area-inset-bottom)); box-sizing: border-box; }
         
-        /* ▼▼▼ 修正箇所2：スクロール問題への対応 ▼▼▼ */
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            background: #ffffff; 
-            padding: 15px; 
-            /* ホーム画面追加時の画面下部の余白に対応するため、下部のpaddingを大きくしました */
-            padding-bottom: 40px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 16px rgba(74, 124, 89, 0.08); 
-            box-sizing: border-box;
-        }
-        /* ▲▲▲ 修正箇所2：ここまで ▲▲▲ */
-        
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 15px; padding-bottom: 40px; border-radius: 16px; box-shadow: 0 4px 16px rgba(74, 124, 89, 0.08); box-sizing: border-box; }
         .status-customer-panel { background: var(--light-green); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .panel-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5ce; padding-bottom: 8px; margin-bottom: 8px; }
         .panel-clock-staff { display: flex; flex-direction: column; gap: 4px; }
@@ -93,11 +80,8 @@
         .count-btn.selected { background: var(--main-green); color: white; border-color: var(--main-green); }
         .count-btn.many { font-size: 0.8rem; padding: 15px 2px; background: #fffdf0; border-color: #e6cc7e; color: #b38600; }
         
-        /* ▼▼▼ 修正箇所1用CSS ▼▼▼ */
-        #ysColorSection { display: none; } /* 初期状態は非表示 */
+        #ysColorSection { display: none; } 
         .ys-color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        /* ▲▲▲ 修正箇所1用CSS：ここまで ▲▲▲ */
-        
         .opt-btn { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center; font-weight: bold; font-size: 0.9rem; cursor: pointer; background: #fff; }
         .opt-btn.selected { background: #e8f5e9; border-color: var(--main-green); color: #2d5a27; }
         .option-tag-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -138,7 +122,7 @@
 <body>
 
 <div class="container">
-    <h2>☁️ ママ号クラウドレジ Vol.21</h2>
+    <h2>☁️ ママ号クラウドレジ Vol.22</h2>
     
     <div class="status-customer-panel">
         <div class="panel-top">
@@ -167,7 +151,7 @@
             </div>
         </div>
         <div class="sub-action-line">
-            <button class="text-btn" onclick="openCustomerListModal()">📱 顧客名郵から選択</button>
+            <button class="text-btn" onclick="openCustomerListModal()">📱 顧客名簿から選択</button>
             <span style="font-size: 0.75rem; color: #888;">(✎数字タップで修正)</span>
         </div>
     </div>
@@ -232,6 +216,7 @@
                 <div id="ys-color" class="opt-btn" onclick="setYsColor('色付き')">🔵 色付き</div>
             </div>
         </div>
+        
         <div id="finishingOptionsSection">
             <div class="modal-section-title">② ご要望（複数選択可）</div>
             <div class="option-tag-grid">
@@ -326,7 +311,6 @@
 </div>
 
 <script>
-    // ⚠️🚨 ここは絶対に書き換えないでください！あなたのURLを最初から組み込んであります 🚨⚠️
     var url_part1 = "https://script.google.com/macros/s/";
     var url_part2 = "AKfycbzUopXVsNwZG4382jkwhhHYpsoF6dBJ3hDaE64Vv2QE8clMdH12RnxUHa7PFBbN8ufb";
     var url_part3 = "/exec";
@@ -427,10 +411,8 @@
         document.getElementById('manualInputArea').style.display = 'none';
         document.getElementById('normalCountGrid').style.display = 'grid';
         
-        // ▼▼▼ 修正箇所1：JSは以前からこのロジックがあったのでそのまま機能します ▼▼▼
         if (name.indexOf('ワイシャツ') > -1) { document.getElementById('ysColorSection').style.display = 'block'; } 
         else { document.getElementById('ysColorSection').style.display = 'none'; }
-        // ▲▲▲ 修正箇所1：ここまで ▲▲▲
         
         var noHangerTatamiCats = ['kotatsu', 'sheets', 'matsuri', 'others'];
         if (noHangerTatamiCats.indexOf(categoryKey) > -1) { document.getElementById('finishingOptionsSection').style.display = 'none'; } 
@@ -471,11 +453,9 @@
             document.getElementById('qbtn-5').classList.add('selected'); 
         }
         
-        // ▼▼▼ 修正箇所1：selectedクラスの付け替え ▼▼▼
         document.getElementById('ys-white').classList.remove('selected'); document.getElementById('ys-color').classList.remove('selected');
         if(modalSelectedYsColor === '白') document.getElementById('ys-white').classList.add('selected'); 
         else document.getElementById('ys-color').classList.add('selected');
-        // ▲▲▲ 修正箇所1：ここまで ▲▲▲
         
         document.getElementById('opt-hanger').classList.remove('selected'); document.getElementById('opt-tatami').classList.remove('selected'); document.getElementById('opt-shimi').classList.remove('selected');
         if(modalSelectedOptions.indexOf('ハンガー') > -1) document.getElementById('opt-hanger').classList.add('selected');
@@ -490,7 +470,6 @@
         var finalName = activeItem.name;
         var finalPrice = activeItem.price;
 
-        // ワイシャツの場合、名前に色情報を追加
         if(activeItem.name.indexOf('ワイシャツ') > -1) finalName += "[" + modalSelectedYsColor + "]";
         if(modalSelectedOptions.indexOf('防水加工') > -1) { finalName += "（防水加工）"; finalPrice += 550; }
 
@@ -620,7 +599,6 @@
                     if (!gpsResolved) {
                         gpsResolved = true;
                         clearTimeout(gpsTimeout);
-                        // Googleマップで開く正確なリンクに改良
                         currentGpsLink = "https://www.google.com/maps?q=" + position.coords.latitude + "," + position.coords.longitude;
                         executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText);
                     }
@@ -812,14 +790,16 @@
         document.getElementById('repTotalItems').innerText = tItems;
     }
     
+    // 💡【ここを改良】日報送信時に「担当者名」を追加してスプレッドシートに投げるようにしました！
     function sendDailyReportToSpreadsheet() {
         var targetDate = document.getElementById('reportDatePicker').value; 
         var memo = document.getElementById('reportDailyMemo').value.trim(); 
         var sales = document.getElementById('repTotalSales').innerText.replace(/,/g, ''); 
         var qty = document.getElementById('repTotalItems').innerText; 
         var count = document.getElementById('repCustomerCount').innerText;
+        var staff = document.getElementById('staffNameInput').value.trim() || '未設定'; // 👈 ここで担当者名を取得！
         
-        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, dailyMemo: memo };
+        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, staffName: staff, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, dailyMemo: memo };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) {
             fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(reportPayload) }).catch(function(e) { console.log("送信エラー"); });
             alert("本日（" + targetDate + "）の集計データをスプレッドシートに送信しました！"); 

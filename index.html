@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>クリーニング受付 現場対応版 Vol.21</title>
+    <style>
+        :root { --main-green: #4a7c59; --light-green: #eef5f0; --border-color: #c8d6cc; --danger: #c0392b; --text-dark: #2c3e50; --bg-gray: #f4f7f5; --edit-orange: #e67e22; }
+        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: calc(30px + env(safe-area-inset-bottom)); box-sizing: border-box; }
+        
+        /* ▼▼▼ 修正箇所2：スクロール問題への対応 ▼▼▼ */
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: #ffffff; 
+            padding: 15px; 
+            /* ホーム画面追加時の画面下部の余白に対応するため、下部のpaddingを大きくしました */
+            padding-bottom: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 16px rgba(74, 124, 89, 0.08); 
+            box-sizing: border-box;
+        }
+        /* ▲▲▲ 修正箇所2：ここまで ▲▲▲ */
+        
+        .status-customer-panel { background: var(--light-green); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 15px; }
+        .panel-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5ce; padding-bottom: 8px; margin-bottom: 8px; }
+        .panel-clock-staff { display: flex; flex-direction: column; gap: 4px; }
+        .clock-display { font-size: 0.9rem; font-weight: bold; color: #2d5a27; }
+        .staff-wrap { font-size: 0.8rem; font-weight: bold; color: #555; }
+        .staff-wrap input { width: 80px; padding: 3px 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; }
+        .tag-status { font-size: 0.8rem; color: #444; text-align: right; }
+        .tag-number { font-size: 1.8rem; font-weight: bold; color: var(--danger); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; display: block; line-height: 1.1; }
+        .panel-bottom { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; align-items: flex-end; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; color: #444; }
+        .search-input-wrap { display: flex; gap: 4px; }
+        .panel-bottom input { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; }
+        .inline-btn { padding: 0 10px; background-color: var(--main-green); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; }
+        .sub-action-line { margin-top: 6px; display: flex; justify-content: space-between; }
+        .text-btn { background: none; border: none; color: var(--main-green); font-size: 0.8rem; font-weight: bold; cursor: pointer; text-decoration: underline; padding: 0; }
+
+        h2 { text-align: center; color: #2d5a27; margin-top: 0; margin-bottom: 10px; font-size: 1.2rem; letter-spacing: 1px; }
+        h3 { font-size: 0.95rem; color: var(--main-green); margin-top: 0; margin-bottom: 10px; border-left: 4px solid var(--main-green); padding-left: 8px; }
+        .section-block { background: #fafdfb; padding: 12px; border-radius: 12px; border: 1px solid #e8f0ea; margin-bottom: 15px; }
+        
+        #categoryView { display: block; }
+        #itemsView { display: none; }
+        .large-category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+        .large-cat-btn { padding: 16px 4px; background: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 0.95rem; font-weight: bold; color: #444; cursor: pointer; text-align: center; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.02); white-space: normal !important; overflow: visible !important; word-wrap: break-word; }
+        .large-cat-btn:active { background: var(--light-green); transform: scale(0.98); }
+        .large-cat-btn.sales-btn { border-color: #e74c3c; color: #e74c3c; background: #fff5f5; }
+        
+        .sub-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: var(--light-green); padding: 10px; border-radius: 8px; }
+        .back-btn { background: var(--main-green); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; }
+        .sub-title { font-size: 1.1rem; font-weight: bold; color: var(--main-green); margin: 0; }
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+        .item-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 8px; text-align: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .item-card:active { transform: scale(0.95); background-color: var(--light-green); }
+        .item-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; display: block; }
+        .item-price { font-size: 0.9rem; color: var(--main-green); font-weight: bold; display: block; }
+        .custom-input-btn { width: 100%; margin-top: 15px; padding: 14px; background-color: #f1c40f; color: #333; border: none; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .receipt-list { list-style: none; padding: 0; margin: 0; }
+        .receipt-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #dfebd5; font-size: 0.95rem; }
+        .tag-badge { background-color: #fff3cd; color: var(--danger); padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; border: 1px solid #f1c40f; margin-right: 8px; min-width: 60px; text-align: center; display: inline-block; }
+        .item-info-wrap { display: flex; align-items: center; }
+        .item-detail-text { display: flex; flex-direction: column; }
+        .item-memo-text { font-size: 0.75rem; color: #7f8c8d; margin-top: 2px; font-weight: normal; }
+        .item-delete-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 5px 10px; }
+        .total-box { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--main-green); }
+        .total-label { font-weight: bold; font-size: 1.1rem; }
+        .total-amount { font-size: 1.8rem; font-weight: bold; color: #2d5a27; }
+        
+        .btn-container { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 15px; }
+        .btn { padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; text-align: center; color: white; }
+        .btn-secondary { background-color: #e0e7e2; color: #555; }
+        .btn-primary { background-color: var(--main-green); }
+        .btn-edit-mode { background-color: var(--edit-orange) !important; }
+        
+        .bottom-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-nav { background-color: #2c3e50; color: white; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; border: none; cursor: pointer; }
+        .btn-nav.green { background-color: #1e6b7b; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 1000; padding: 10px; box-sizing: border-box; }
+        .modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 380px; text-align: left; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
+        .modal-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: #2d5a27; text-align: center; border-bottom: 2px solid var(--light-green); padding-bottom: 8px; }
+        .cancel-link { display: block; text-align: center; color: #888; font-size: 0.9rem; margin-top: 15px; cursor: pointer; text-decoration: underline; }
+        
+        .modal-section-title { font-size: 0.85rem; font-weight: bold; color: #7f8c8d; margin: 15px 0 8px 0; }
+        .count-btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .count-btn { padding: 15px 0; background: #f0f7f2; border: 2px solid #d2e4d7; border-radius: 8px; font-size: 1.1rem; font-weight: bold; color: #2d5a27; cursor: pointer; }
+        .count-btn.selected { background: var(--main-green); color: white; border-color: var(--main-green); }
+        .count-btn.many { font-size: 0.8rem; padding: 15px 2px; background: #fffdf0; border-color: #e6cc7e; color: #b38600; }
+        
+        /* ▼▼▼ 修正箇所1用CSS ▼▼▼ */
+        #ysColorSection { display: none; } /* 初期状態は非表示 */
+        .ys-color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        /* ▲▲▲ 修正箇所1用CSS：ここまで ▲▲▲ */
+        
+        .opt-btn { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center; font-weight: bold; font-size: 0.9rem; cursor: pointer; background: #fff; }
+        .opt-btn.selected { background: #e8f5e9; border-color: var(--main-green); color: #2d5a27; }
+        .option-tag-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .waterproof-btn-wrap { display: none; margin-top: 10px; }
+        .btn-waterproof { width: 100%; padding: 12px; border: 2px dashed #3498db; color: #2980b9; background: #f4f9fd; border-radius: 8px; font-weight: bold; text-align: center; cursor: pointer; font-size: 0.95rem; }
+        .btn-waterproof.selected { background: #dfebf8; border-color: #2980b9; color: #1c5980; }
+        .modal-text-input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .extra-fee-wrap { display: flex; align-items: center; gap: 6px; background: #eef5f0; padding: 6px 10px; border-radius: 8px; border: 1px solid #c8d6cc; }
+        .extra-fee-wrap input { width: 65px; padding: 6px; text-align: right; border: 1px solid #cbd5ce; border-radius: 6px; font-size: 1rem; }
+
+        .checkout-total-box { text-align: center; margin-bottom: 15px; background: #fafdfb; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .checkout-total-amount { font-size: 2.5rem; font-weight: bold; color: var(--danger); margin-top: 5px; }
+        .payment-toggle { display: flex; gap: 10px; margin-bottom: 15px; }
+        .pay-btn { flex: 1; padding: 15px 6px; border: 2px solid var(--border-color); border-radius: 8px; font-weight: bold; text-align: center; cursor: pointer; background: #fff; color: #555; font-size: 0.95rem; line-height: 1.4; }
+        .pay-btn.selected { background: #e8f5e9; border-color: var(--main-green); color: #2d5a27; }
+        
+        .history-list-box { max-height: 250px; overflow-y: auto; border: 1px solid #e2ebd5; border-radius: 8px; font-size: 0.85rem; background: #fff; margin-bottom: 10px; }
+        .history-item { padding: 12px; border-bottom: 1px solid #f0f4f1; }
+        .history-summary-line { display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; }
+        .history-detail-area { display: none; padding: 10px; background: #fafdfb; border-radius: 6px; margin-top: 8px; border-left: 4px solid var(--border-color); }
+        .history-detail-area.active { display: block; }
+        .action-row { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+        .mini-btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .mini-btn-danger { background: #e74c3c; color: white; }
+        .mini-btn-success { background: #3498db; color: white; }
+        .badge-pay-type { padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: white; margin-right: 6px; }
+        .bg-now { background-color: #2e7d32; }
+        .bg-later { background-color: var(--danger); }
+        .bg-cancel { background-color: #7f8c8d; }
+        
+        .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; margin-bottom: 15px; }
+        .report-card { background: #f8faf9; padding: 12px; border-radius: 8px; border: 1px solid #e2ebd5; }
+        .report-card.total { grid-column: span 2; background: #e8f5e9; border-color: #c8e6c9; }
+        .report-label { font-size: 0.8rem; color: #666; font-weight: bold; }
+        .report-val { font-size: 1.4rem; font-weight: bold; color: #2d5a27; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>☁️ ママ号クラウドレジ Vol.21</h2>
+    
+    <div class="status-customer-panel">
+        <div class="panel-top">
+            <div class="panel-clock-staff">
+                <div id="clockDisplay" class="clock-display">--/-- (--) --:--:--</div>
+                <div class="staff-wrap">
+                    👤 担当: <input type="text" id="staffNameInput" placeholder="名前" onchange="saveStaffName()">
+                </div>
+            </div>
+            <div class="tag-status">
+                次回タグ番号<br>
+                <span id="statusTag" class="tag-number" onclick="editTagNumber()">1-1</span>
+            </div>
+        </div>
+        <div class="panel-bottom">
+            <div class="form-group">
+                <label for="custPhone">📞 お電話番号</label>
+                <div class="search-input-wrap">
+                    <input type="tel" id="custPhone" placeholder="09000000000">
+                    <button class="inline-btn" onclick="searchCustomerByPhone()">🔍 検索</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="custName">👤 お名前</label>
+                <input type="text" id="custName" placeholder="山田 太郎">
+            </div>
+        </div>
+        <div class="sub-action-line">
+            <button class="text-btn" onclick="openCustomerListModal()">📱 顧客名郵から選択</button>
+            <span style="font-size: 0.75rem; color: #888;">(✎数字タップで修正)</span>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <div id="categoryView">
+            <h3>👕 商品カテゴリを選択</h3>
+            <div class="large-category-grid" id="largeCategoryContainer"></div>
+            <button class="custom-input-btn" onclick="openCustomModal()">✍️ 特殊品・金額を手入力する</button>
+        </div>
+        <div id="itemsView">
+            <div class="sub-header">
+                <button class="back-btn" onclick="backToCategories()">🔙 もどる</button>
+                <h3 class="sub-title" id="currentCategoryTitle">カテゴリ名</h3>
+            </div>
+            <div class="item-grid" id="itemGridContainer"></div>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <h3>📋 お預かり明細</h3>
+        <ul id="receiptList" class="receipt-list">
+            <li style="color: #999; justify-content: center; border: none;" id="emptyMessage">商品が選択されていません</li>
+        </ul>
+        <div class="total-box">
+            <div class="total-label">合計金額 (税込)</div>
+            <div class="total-amount">¥<span id="totalPrice">0</span></div>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn btn-secondary" onclick="resetForm()">クリア</button>
+        <button id="checkoutBtnMain" class="btn btn-primary" onclick="openCheckoutModal()">お会計へ進む</button>
+    </div>
+
+    <div class="bottom-action-grid">
+        <button class="btn-nav" onclick="openTodayOrdersModal()">📋 本日の受付一覧（修正・取消）</button>
+        <button class="btn-nav green" onclick="openReportModal()">📊 日次集計レポート（締める）</button>
+    </div>
+</div>
+
+<div id="quantityModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-title" id="modalItemName">商品名</div>
+        <div class="modal-section-title">① 枚数を選択</div>
+        <div class="count-btn-grid" id="normalCountGrid">
+            <button class="count-btn selected" id="qbtn-1" onclick="setModalQty(1)">1</button>
+            <button class="count-btn" id="qbtn-2" onclick="setModalQty(2)">2</button>
+            <button class="count-btn" id="qbtn-3" onclick="setModalQty(3)">3</button>
+            <button class="count-btn" id="qbtn-4" onclick="setModalQty(4)">4</button>
+            <button class="count-btn many" id="qbtn-5" onclick="showManualInput()">5枚〜</button>
+        </div>
+        <div style="display:none; text-align: center; margin-bottom:10px;" id="manualInputArea">
+            <input type="number" id="manualCountField" min="5" value="5" style="width:80px; padding:8px; font-size:1.2rem; text-align:center;"> 枚
+            <button class="inline-btn" style="padding:8px 15px;" onclick="setModalQty('manual')">OK</button>
+        </div>
+        
+        <div id="ysColorSection">
+            <div class="modal-section-title">白 / 色付きの選択</div>
+            <div class="ys-color-grid">
+                <div id="ys-white" class="opt-btn selected" onclick="setYsColor('白')">⚪️ 白</div>
+                <div id="ys-color" class="opt-btn" onclick="setYsColor('色付き')">🔵 色付き</div>
+            </div>
+        </div>
+        <div id="finishingOptionsSection">
+            <div class="modal-section-title">② ご要望（複数選択可）</div>
+            <div class="option-tag-grid">
+                <div id="opt-hanger" class="opt-btn" onclick="toggleOption('ハンガー')">ハンガー</div>
+                <div id="opt-tatami" class="opt-btn" onclick="toggleOption('たたみ')">たたみ</div>
+                <div id="opt-shimi" class="opt-btn" onclick="toggleOption('シミ抜き')">シミ抜き</div>
+            </div>
+        </div>
+        <div id="waterproofSection" class="waterproof-btn-wrap">
+            <div class="modal-section-title">✨ プラスオプション</div>
+            <div id="opt-waterproof" class="btn-waterproof" onclick="toggleOption('防水加工')">💧 防水加工 (+¥550)</div>
+        </div>
+        <div class="modal-section-title">③ 手入力の備考 ＆ オプション追加料金</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="modalCustomMemo" class="modal-text-input" style="flex: 1;" placeholder="例：撥水加工、ほつれ等">
+            <div class="extra-fee-wrap">
+                <span style="font-size: 0.85rem; font-weight: bold; color: #2d5a27;">+¥</span>
+                <input type="number" id="modalExtraFee" placeholder="0">
+            </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:20px; padding:15px;" onclick="confirmModalSelection()">カートに追加する</button>
+        <div class="cancel-link" onclick="closeModal()">キャンセル</div>
+    </div>
+</div>
+
+<div id="todayOrdersModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-title">📋 本日の受付一覧</div>
+        <div style="margin-bottom: 10px;">
+            <input type="text" id="orderSearchKey" placeholder="🔍 名前で検索..." oninput="renderTodayOrders()" class="modal-text-input">
+        </div>
+        <div class="history-list-box" id="todayOrdersContainer"></div>
+        <div class="cancel-link" onclick="closeTodayOrdersModal()">閉じる</div>
+    </div>
+</div>
+
+<div id="checkoutModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-title" id="checkoutModalTitle">💰 受付・お会計確定</div>
+        <div class="checkout-total-box">
+            <div id="checkoutQty" style="font-weight:bold; color:#2d5a27;">お預かり: 0点</div>
+            <div style="font-size:0.9rem; color:#555; font-weight:bold; margin-top:5px;">合計請求金額 (税込)</div>
+            <div class="checkout-total-amount">¥<span id="checkoutTotalPrice">0</span></div>
+        </div>
+        <div class="payment-toggle">
+            <div id="pay-now" class="pay-btn selected" onclick="setPaymentType('now')">👇 今すぐお支払い<br><small>(前金)</small></div>
+            <div id="pay-later" class="pay-btn" onclick="setPaymentType('later')">📦 仕上がり時払い<br><small>(後金・貸し)</small></div>
+        </div>
+        <button id="checkoutConfirmBtn" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.15rem;" onclick="submitOrder()">✅ 受付を確定する</button>
+        <div class="cancel-link" onclick="closeCheckoutModal()">やり直す（戻る）</div>
+    </div>
+</div>
+
+<div id="customModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-title">✍️ 特殊品・手入力</div>
+        <label style="font-size:0.85rem; font-weight:bold;">商品名:</label>
+        <input type="text" id="customItemName" class="modal-text-input" style="margin-bottom:12px;" placeholder="例: 特大ジュータン">
+        <label style="font-size:0.85rem; font-weight:bold;">金額 (税込):</label>
+        <input type="number" id="customItemPrice" class="modal-text-input" style="margin-bottom:15px;">
+        <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="addCustomItem()">選択画面へ進む</button>
+        <div class="cancel-link" onclick="closeCustomModal()">キャンセル</div>
+    </div>
+</div>
+
+<div id="customerModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-title">📱 顧客名簿</div>
+        <div class="history-list-box" id="customerListContainer" style="max-height:250px;"></div>
+        <div class="cancel-link" onclick="closeCustomerModal()">閉じる</div>
+    </div>
+</div>
+
+<div id="reportModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-title">📊 日次集計レポート</div>
+        <div style="margin-bottom:12px; text-align: center;">
+            <input type="date" id="reportDatePicker" onchange="calculateReport()" style="padding:8px; font-size:1rem; border:1px solid #cbd5ce; border-radius:6px;">
+        </div>
+        <div class="report-grid">
+            <div class="report-card total"><div class="report-label">① 本日の売上合計 (税込)</div><div class="report-val">¥<span id="repTotalSales">0</span></div></div>
+            <div class="report-card"><div class="report-label">② 総お預かり点数</div><div class="report-val" style="color:#000;"><span id="repTotalItems">0</span> 点</div></div>
+            <div class="report-card"><div class="report-label">③ 受付客数</div><div class="report-val" style="color:#000;"><span id="repCustomerCount">0</span> 名</div></div>
+            <div class="report-card"><div class="report-label">入金高 (前金)</div><div class="report-val" style="color:#2e7d32; font-size:1.2rem;">¥<span id="repTotalCash">0</span></div></div>
+            <div class="report-card"><div class="report-label">売掛金 (後金)</div><div class="report-val" style="color:#c0392b; font-size:1.2rem;">¥<span id="repTotalCredit">0</span></div></div>
+        </div>
+        <div class="modal-section-title">📝 本日の業務日報・メモ</div>
+        <textarea id="reportDailyMemo" class="modal-text-input" rows="3" placeholder="例：〇〇様、次回布団の集配希望。" style="resize:none; margin-bottom:15px; font-family:inherit;"></textarea>
+        <button class="btn btn-primary" style="width:100%; background:#2c3e50; margin-bottom:10px; padding:14px;" onclick="sendDailyReportToSpreadsheet()">📊 本日の集計を送信して締める</button>
+        <button class="btn btn-secondary" onclick="closeReportModal()" style="width:100%;">閉じる</button>
+    </div>
+</div>
+
+<script>
+    // ⚠️🚨 ここは絶対に書き換えないでください！あなたのURLを最初から組み込んであります 🚨⚠️
+    var url_part1 = "https://script.google.com/macros/s/";
+    var url_part2 = "AKfycbzUopXVsNwZG4382jkwhhHYpsoF6dBJ3hDaE64Vv2QE8clMdH12RnxUHa7PFBbN8ufb";
+    var url_part3 = "/exec";
+    var GAS_URL = url_part1 + url_part2 + url_part3;
+
+    var masterCatalog = {
+        "sales": { title: "🎁 セール品", items: [{name: "【セール】ダウンジャケット", price: 1500}, {name: "【セール】コート", price: 800}, {name: "【セール】セーター", price: 300}, {name: "【セール】毛布S", price: 500}] },
+        "shirts": { title: "👔 ワイシャツ類", items: [{name: "ワイシャツ(白・色付)", price: 180}, {name: "ワイシャツ(濃色)", price: 200}, {name: "ワイシャツ(手仕上げ)", price: 300}, {name: "シャツ(綿)", price: 350}, {name: "シャツ(ウール・絹)", price: 400}, {name: "Tシャツ", price: 350}, {name: "ポロシャツ", price: 400}, {name: "学生シャツブラウス", price: 300}, {name: "シャツブラウス", price: 350}, {name: "デザインブラウス", price: 450}, {name: "デザインブラウス(シルク)", price: 500}] },
+        "sweaters": { title: "🧶 ニット類", items: [{name: "セーター(サマー)", price: 450}, {name: "セーター(厚手)", price: 500}, {name: "カーディガン(サマー)", price: 450}, {name: "カーディガン(厚手)", price: 500}, {name: "ニットベスト", price: 400}, {name: "セーター(カシミア)", price: 700}, {name: "セーター(アンゴラ等)", price: 700}, {name: "トレーナー", price: 400}, {name: "フリース", price: 450}, {name: "パーカー", price: 450}, {name: "タンクトップ", price: 350}, {name: "キャミソール", price: 350}, {name: "チュニック", price: 450}, {name: "デザインチュニック", price: 500}] },
+        "jackets": { title: "🧥 上着・ブレザー", items: [{name: "背広・ジャケット", price: 600}, {name: "背広・ジャケット(ロング)", price: 700}, {name: "ブレザー", price: 600}, {name: "ベスト", price: 400}, {name: "事務服(ベスト)", price: 400}, {name: "園児服(衿込で)", price: 400}, {name: "園児ヒダスカート", price: 400}] },
+        "pants": { title: "👖 ズボン・スカート", items: [{name: "スラックス", price: 500}, {name: "婦人ズボン", price: 500}, {name: "綿パン・ジーンズ", price: 450}, {name: "ハーフパンツ", price: 350}, {name: "タイトスカート", price: 450}, {name: "フレアスカート", price: 450}, {name: "キュロットスカート", price: 450}, {name: "ロングスカート", price: 500}, {name: "ヒダスカート", price: 500}, {name: "プリーツスカート", price: 600}, {name: "ベルベットスカート", price: 600}] },
+        "dress": { title: "👗 ドレス・ワンピース", items: [{name: "ワンピース(ニット)", price: 700}, {name: "ワンピース(ポリエステル)", price: 800}, {name: "ワンピース(綿)", price: 800}, {name: "ワンピース(綿ポリ)", price: 800}, {name: "ワンピース(ベルベット)", price: 1000}, {name: "オールインワン", price: 800}, {name: "パーティードレス", price: 1500}, {name: "イブニングドレス", price: 3000}, {name: "ボレロ", price: 500}, {name: "子供パーティードレス", price: 500}] },
+        "formal": { title: "🎩 礼服・モーニング", items: [{name: "モーニング(上)", price: 2000}, {name: "モーニング(下)", price: 600}, {name: "モーニング(ベスト)", price: 500}, {name: "礼服(紳士) 上", price: 900}, {name: "礼服(紳士) 下", price: 600}, {name: "礼服(婦人) 上", price: 600}, {name: "礼服(婦人) ズボン", price: 500}, {name: "礼服(婦人) スカート", price: 500}, {name: "礼服(婦人) ブラウス", price: 500}, {name: "礼服(婦人) ワンピース", price: 1000}] },
+        "outers": { title: "❄️ 防寒・アウター", items: [{name: "防寒ベスト", price: 600}, {name: "ジャンパー裏なし", price: 650}, {name: "ジャンパー裏有り", price: 700}, {name: "防寒ズボン", price: 650}, {name: "ベンチコート", price: 850}, {name: "コート", price: 900}, {name: "コート(ロング)", price: 1200}, {name: "トレンチコート", price: 1500}, {name: "ベルベットコート", price: 1500}, {name: "ママコート", price: 1500}, {name: "ダウンベスト", price: 1200}, {name: "ライトダウン", price: 1200}, {name: "ダウンジャケット", price: 2000}, {name: "ダウンコート", price: 2700}, {name: "スキーウェア(上)", price: 1200}, {name: "スキーウェア(下)", price: 800}, {name: "子供スキーウェア(上)", price: 550}, {name: "子供スキーウェア(下)", price: 650}, {name: "ジャンプスーツ(130迄)", price: 1100}, {name: "ジャンプスーツ(130～)", price: 1600}, {name: "スキー手袋(大人)", price: 700}, {name: "スキー手袋(子供)", price: 550}, {name: "手袋(ニット)", price: 350}] },
+        "kotatsu": { title: "🛏️ こたつ・毛布", items: [{name: "こたつ布団(正方形·掛)", price: 1500}, {name: "こたつ布団(正方形·敷)", price: 1300}, {name: "こたつ布団(長方形·掛)", price: 2000}, {name: "こたつ布団(長方形·敷)", price: 1600}, {name: "タオルケット/綿毛布 S", price: 600}, {name: "タオルケット/綿毛布 W", price: 900}, {name: "毛布 S (1枚物)", price: 700}, {name: "毛布 W (1枚物)", price: 900}, {name: "毛布 S (合わせ)", price: 900}, {name: "毛布 W (合わせ)", price: 1700}, {name: "ベビー毛布・ひざ掛け", price: 400}, {name: "毛布丹前", price: 800}, {name: "毛布布団 S", price: 2500}, {name: "毛布布団 W", price: 3000}, {name: "電気毛布", price: 1500}, {name: "ベッドパット S", price: 1100}, {name: "ベッドパット W", price: 1600}, {name: "肌掛布団", price: 800}, {name: "寝袋(ダウン)", price: 2100}, {name: "敷パット/敷毛布 S", price: 700}, {name: "敷パット/敷毛布 W", price: 900}, {name: "敷毛布 綿入り S", price: 1000}, {name: "敷毛布 綿入り W", price: 1300}] },
+        "sheets": { title: "🪑 シーツ・カバー", items: [{name: "イスカバー(小)", price: 450}, {name: "イスカバー(中)", price: 550}, {name: "イスカバー(大)", price: 650}, {name: "テーブルクロス(綿)", price: 450}, {name: "テーブルクロス(レース)", price: 500}, {name: "カーテン(ウール)", price: 850}, {name: "レースカーテン", price: 750}, {name: "紅白幕(2m×2m)", price: 1100}, {name: "のぼり(180x60)", price: 500}, {name: "掛布団側", price: 700}, {name: "敷布団側", price: 650}, {name: "のれん", price: 300}, {name: "シーツ S", price: 350}, {name: "シーツ W", price: 600}, {name: "タオル・ボアシーツ S", price: 400}, {name: "タオル・ボアシーツ W", price: 650}, {name: "布団カバー S", price: 450}, {name: "布団カバー W", price: 650}, {name: "枕カバー", price: 200}, {name: "座布団カバー(白)", price: 200}, {name: "座布団カバー(色柄)", price: 250}, {name: "シートカバー", price: 250}, {name: "チャイルドシートカバー", price: 550}, {name: "マルチカバー(正方形)", price: 850}, {name: "マルチカバー(長方形)", price: 1100}, {name: "鏡", price: 650}] },
+        "school": { title: "🎒 学生服・作業着", items: [{name: "学生服(ツメエリ)", price: 600}, {name: "学生ズボン", price: 500}, {name: "セーラー服(夏・冬)", price: 500}, {name: "学生ヒダスカート", price: 550}, {name: "学生スカーフ", price: 150}, {name: "ボウタイ", price: 150}, {name: "はちまき", price: 150}, {name: "ユニフォーム(上)", price: 400}, {name: "ユニフォーム(下)", price: 350}, {name: "ジャージ(上)", price: 400}, {name: "ジャージ(下)", price: 350}, {name: "柔道着(上)", price: 600}, {name: "柔道着(下)", price: 400}, {name: "柔道着(帯)", price: 200}, {name: "剣道着(上)", price: 600}, {name: "剣道着(袴)", price: 1100}, {name: "まわし", price: 1300}, {name: "作業着", price: 400}, {name: "作業ズボン", price: 450}, {name: "作業シャツ", price: 350}, {name: "作業ツナギ", price: 600}, {name: "防寒ツナギ", price: 1200}, {name: "白衣(ワンピース)", price: 400}, {name: "白衣(長)", price: 350}, {name: "白衣(半)", price: 250}, {name: "白衣(コック用)", price: 300}, {name: "エプロン", price: 250}, {name: "前かけ", price: 200}, {name: "かっぽう着", price: 300}, {name: "白ズボン", price: 350}, {name: "ナースキャップ", price: 250}, {name: "三角巾", price: 150}, {name: "ハンチング・ベレー帽", price: 350}, {name: "野球帽・登山帽", price: 350}, {name: "毛糸帽", price: 300}, {name: "コック帽(長)", price: 350}, {name: "コック帽(短)", price: 300}, {name: "白帽子", price: 300}, {name: "警察帽子", price: 400}] },
+        "matsuri": { title: "🏮 祭り物・浴衣", items: [{name: "さらし(一反)", price: 450}, {name: "足袋(白・黒・柄)", price: 350}, {name: "地下足袋", price: 500}, {name: "祭り用浴衣", price: 600}, {name: "色浴衣", price: 1000}, {name: "綿入半天", price: 750}, {name: "半天(袖なし)", price: 550}, {name: "半天(大)", price: 550}, {name: "半天(中)", price: 500}, {name: "半天(小)", price: 350}, {name: "半天(ひも)", price: 150}, {name: "おこし", price: 300}, {name: "たすき", price: 250}, {name: "しごき", price: 250}, {name: "帯(祭り用)", price: 350}, {name: "腹巻(伊達巻)", price: 350}, {name: "腹あて(三角)", price: 300}, {name: "またひき", price: 450}, {name: "鯉のぼり(3mセット)", price: 3100}, {name: "鯉のぼり(5mセット)", price: 5100}, {name: "和装 肌着(上)", price: 300}, {name: "和装 オコシ(下)", price: 300}, {name: "和装 長肌着", price: 500}, {name: "丹前下", price: 500}, {name: "丹前(綿入り)", price: 1600}, {name: "丹前(ウール)", price: 1100}, {name: "パジャマ(上・下)", price: 550}, {name: "パジャマ(シルク上下)", price: 650}, {name: "ケープ", price: 400}, {name: "肌着(らくだ)", price: 400}, {name: "ももひき(らくだ)", price: 400}, {name: "ガウン(目安)", price: 850}, {name: "おくるみ", price: 500}, {name: "ねんねこ", price: 1600}, {name: "ベビードレス(帽子)", price: 550}, {name: "亀甲(冬用)", price: 500}, {name: "亀甲(夏用)", price: 450}] },
+        "others": { title: "✨ 小物・加工", items: [{name: "ネクタイ", price: 350}, {name: "スコットタイ", price: 350}, {name: "マフラー", price: 350}, {name: "スカーフ", price: 400}, {name: "ストール", price: 450}, {name: "ソックス", price: 250}, {name: "手拭い", price: 150}, {name: "バスタオル", price: 250}, {name: "フェイスタオル", price: 150}, {name: "仏敷", price: 1000}, {name: "防水・撥水加工", price: 550}, {name: "付属品1点につき", price: 50}, {name: "りぼん", price: 50}, {name: "ベルト", price: 50}, {name: "フード", price: 50}, {name: "ダウンフード", price: 200}, {name: "ライナー", price: 100}, {name: "ダウンライナー(袖無)", price: 500}, {name: "ファー(アクリル系)", price: 50}, {name: "ファー(ラビット等)", price: 500}, {name: "裏付(+)", price: 50}, {name: "ロング(+)", price: 200}, {name: "ワンピースプリーツ(+)", price: 300}, {name: "のり強目", price: 50}, {name: "のりなし", price: 50}, {name: "漂白", price: 100}] }
+    };
+
+    var cart = []; 
+    var currentPaymentType = 'now';
+    var globalTagParent = parseInt(localStorage.getItem('tagParent')) || 1;
+    var globalTagChild = parseInt(localStorage.getItem('tagChild')) || 1;
+    var currentGpsLink = "取得していません";
+    var editingOrderId = null;
+    var activeItem = null; 
+    var modalSelectedQty = 1; 
+    var modalSelectedYsColor = '白'; 
+    var modalSelectedOptions = [];
+
+    window.onload = function() {
+        updateClock();
+        if (localStorage.getItem('cleaning_staff_name')) {
+            document.getElementById('staffNameInput').value = localStorage.getItem('cleaning_staff_name');
+        }
+        document.getElementById('reportDatePicker').value = new Date().toISOString().split('T')[0];
+        buildDrillDownMenu(); 
+        updateDisplay();
+    };
+
+    function updateClock() {
+        var now = new Date();
+        var days = ['日', '月', '火', '水', '木', '金', '土'];
+        var y = now.getFullYear();
+        var m = String(now.getMonth() + 1).padStart(2, '0');
+        var d = String(now.getDate()).padStart(2, '0');
+        var dw = days[now.getDay()];
+        var h = String(now.getHours()).padStart(2, '0');
+        var min = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clockDisplay').innerText = y + "/" + m + "/" + d + " (" + dw + ") " + h + ":" + min;
+    }
+    setInterval(updateClock, 1000);
+
+    function saveStaffName() { localStorage.setItem('cleaning_staff_name', document.getElementById('staffNameInput').value.trim()); }
+
+    function buildDrillDownMenu() {
+        var catContainer = document.getElementById('largeCategoryContainer');
+        catContainer.innerHTML = '';
+        Object.keys(masterCatalog).forEach(function(key) {
+            var btn = document.createElement('button');
+            btn.className = "large-cat-btn " + (key === 'sales' ? 'sales-btn' : '');
+            btn.innerText = masterCatalog[key].title;
+            btn.onclick = function() { openCategory(key); };
+            catContainer.appendChild(btn);
+        });
+    }
+
+    function openCategory(key) {
+        document.getElementById('categoryView').style.display = 'none';
+        document.getElementById('itemsView').style.display = 'block';
+        document.getElementById('currentCategoryTitle').innerText = masterCatalog[key].title;
+        
+        var itemGrid = document.getElementById('itemGridContainer');
+        itemGrid.innerHTML = '';
+        masterCatalog[key].items.forEach(function(item) {
+            var card = document.createElement('div');
+            card.className = 'item-card';
+            card.onclick = function() { openQuantityModal(item.name, item.price, key); };
+            card.innerHTML = '<span class="item-name">' + item.name + '</span><span class="item-price">¥' + item.price.toLocaleString() + '</span>';
+            itemGrid.appendChild(card);
+        });
+    }
+
+    function backToCategories() {
+        document.getElementById('itemsView').style.display = 'none';
+        document.getElementById('categoryView').style.display = 'block';
+    }
+
+    function openQuantityModal(name, price, categoryKey) {
+        activeItem = { name: name, price: price, categoryKey: categoryKey };
+        document.getElementById('modalItemName').innerText = name + " (¥" + price + ")";
+        
+        modalSelectedQty = 1; modalSelectedYsColor = '白'; modalSelectedOptions = [];
+        document.getElementById('modalCustomMemo').value = '';
+        document.getElementById('modalExtraFee').value = '';
+        document.getElementById('manualInputArea').style.display = 'none';
+        document.getElementById('normalCountGrid').style.display = 'grid';
+        
+        // ▼▼▼ 修正箇所1：JSは以前からこのロジックがあったのでそのまま機能します ▼▼▼
+        if (name.indexOf('ワイシャツ') > -1) { document.getElementById('ysColorSection').style.display = 'block'; } 
+        else { document.getElementById('ysColorSection').style.display = 'none'; }
+        // ▲▲▲ 修正箇所1：ここまで ▲▲▲
+        
+        var noHangerTatamiCats = ['kotatsu', 'sheets', 'matsuri', 'others'];
+        if (noHangerTatamiCats.indexOf(categoryKey) > -1) { document.getElementById('finishingOptionsSection').style.display = 'none'; } 
+        else { document.getElementById('finishingOptionsSection').style.display = 'block'; }
+
+        var allowWaterproofCats = ['outers'];
+        if (allowWaterproofCats.indexOf(categoryKey) > -1) { document.getElementById('waterproofSection').style.display = 'block'; } 
+        else { document.getElementById('waterproofSection').style.display = 'none'; }
+
+        updateModalUi();
+        document.getElementById('quantityModal').style.display = 'flex';
+    }
+
+    function setModalQty(qty) {
+        if(qty === 'manual') { 
+            var val = parseInt(document.getElementById('manualCountField').value); 
+            if(val >= 5) modalSelectedQty = val; 
+        } else { 
+            modalSelectedQty = qty; 
+        }
+        updateModalUi();
+    }
+    function showManualInput() { document.getElementById('normalCountGrid').style.display = 'none'; document.getElementById('manualInputArea').style.display = 'block'; }
+    function setYsColor(color) { modalSelectedYsColor = color; updateModalUi(); }
+    function toggleOption(opt) { 
+        var idx = modalSelectedOptions.indexOf(opt); 
+        if(idx > -1) modalSelectedOptions.splice(idx, 1); 
+        else modalSelectedOptions.push(opt); 
+        updateModalUi(); 
+    }
+
+    function updateModalUi() {
+        document.querySelectorAll('.count-btn').forEach(function(b) { b.classList.remove('selected'); });
+        if(modalSelectedQty <= 4) { 
+            var btn = document.getElementById("qbtn-" + modalSelectedQty); 
+            if(btn) btn.classList.add('selected'); 
+        } else { 
+            document.getElementById('qbtn-5').classList.add('selected'); 
+        }
+        
+        // ▼▼▼ 修正箇所1：selectedクラスの付け替え ▼▼▼
+        document.getElementById('ys-white').classList.remove('selected'); document.getElementById('ys-color').classList.remove('selected');
+        if(modalSelectedYsColor === '白') document.getElementById('ys-white').classList.add('selected'); 
+        else document.getElementById('ys-color').classList.add('selected');
+        // ▲▲▲ 修正箇所1：ここまで ▲▲▲
+        
+        document.getElementById('opt-hanger').classList.remove('selected'); document.getElementById('opt-tatami').classList.remove('selected'); document.getElementById('opt-shimi').classList.remove('selected');
+        if(modalSelectedOptions.indexOf('ハンガー') > -1) document.getElementById('opt-hanger').classList.add('selected');
+        if(modalSelectedOptions.indexOf('たたみ') > -1) document.getElementById('opt-tatami').classList.add('selected');
+        if(modalSelectedOptions.indexOf('シミ抜き') > -1) document.getElementById('opt-shimi').classList.add('selected');
+        
+        document.getElementById('opt-waterproof').classList.remove('selected');
+        if(modalSelectedOptions.indexOf('防水加工') > -1) document.getElementById('opt-waterproof').classList.add('selected');
+    }
+
+    function confirmModalSelection() {
+        var finalName = activeItem.name;
+        var finalPrice = activeItem.price;
+
+        // ワイシャツの場合、名前に色情報を追加
+        if(activeItem.name.indexOf('ワイシャツ') > -1) finalName += "[" + modalSelectedYsColor + "]";
+        if(modalSelectedOptions.indexOf('防水加工') > -1) { finalName += "（防水加工）"; finalPrice += 550; }
+
+        var memoParts = modalSelectedOptions.filter(function(o) { return o !== '防水加工'; });
+        var customMemo = document.getElementById('modalCustomMemo').value.trim();
+        if(customMemo) memoParts.push(customMemo);
+        
+        var extraFee = parseInt(document.getElementById('modalExtraFee').value) || 0;
+        if(extraFee > 0) {
+            finalPrice += extraFee;
+            memoParts.push("追加料金+" + extraFee + "円");
+        }
+
+        var finalMemo = memoParts.join('・');
+
+        for(var i=0; i<modalSelectedQty; i++) { cart.push({ name: finalName, price: finalPrice, memo: finalMemo }); }
+        closeModal(); updateDisplay();
+    }
+    function closeModal() { document.getElementById('quantityModal').style.display = 'none'; activeItem = null; }
+
+    function openCustomModal() { document.getElementById('customModal').style.display = 'flex'; }
+    function closeCustomModal() { document.getElementById('customModal').style.display = 'none'; }
+    function addCustomItem() {
+        var n = document.getElementById('customItemName').value.trim() || '特殊品'; var p = parseInt(document.getElementById('customItemPrice').value);
+        if(p >= 0) { closeCustomModal(); openQuantityModal(n, p, 'custom'); } else { alert('正しい数値を入力してください'); }
+    }
+
+    function removeCart(idx) { cart.splice(idx, 1); updateDisplay(); }
+
+    function updateDisplay() {
+        var list = document.getElementById('receiptList'); list.innerHTML = '';
+        document.getElementById('statusTag').innerText = globalTagParent + "-" + globalTagChild;
+        
+        var checkoutBtn = document.getElementById('checkoutBtnMain');
+        if (editingOrderId) {
+            checkoutBtn.innerText = "✏️ 修正を確定する";
+            checkoutBtn.classList.add('btn-edit-mode');
+        } else {
+            checkoutBtn.innerText = "お会計へ進む";
+            checkoutBtn.classList.remove('btn-edit-mode');
+        }
+
+        if (cart.length === 0) { 
+            list.innerHTML = '<li style="color:#999; justify-content:center; border:none;">商品が選択されていません</li>'; 
+            document.getElementById('totalPrice').innerText = '0'; 
+            return; 
+        }
+        
+        var tP = globalTagParent; var tC = globalTagChild; var total = 0;
+        cart.forEach(function(item, idx) {
+            total += item.price;
+            var li = document.createElement('li');
+            var memoHtml = item.memo ? '<span class="item-memo-text">💡 ' + item.memo + '</span>' : '';
+            li.innerHTML = '<div class="item-info-wrap"><span class="tag-badge">' + tP + '-' + tC + '</span><div class="item-detail-text"><strong>' + item.name + '</strong>' + memoHtml + '</div></div><div><span>¥' + item.price.toLocaleString() + '</span><button class="item-delete-btn" onclick="removeCart(' + idx + ')">❌</button></div>';
+            list.appendChild(li);
+            tC++; if(tC > 200) { tC = 1; tP++; }
+        });
+        document.getElementById('totalPrice').innerText = total.toLocaleString();
+    }
+
+    function editTagNumber() {
+        var p = prompt("新しい【親番】（1〜99）", globalTagParent); if(!p || isNaN(p)) return;
+        var c = prompt("新しい【小番】（1〜200）", globalTagChild); if(!c || isNaN(c)) return;
+        globalTagParent = parseInt(p); globalTagChild = parseInt(c); 
+        localStorage.setItem('tagParent', globalTagParent); localStorage.setItem('tagChild', globalTagChild); updateDisplay();
+    }
+
+    function resetForm() { 
+        if(confirm('レジ入力をクリアしますか？')) { 
+            document.getElementById('custName').value = ''; 
+            document.getElementById('custPhone').value = ''; 
+            cart = []; 
+            editingOrderId = null; 
+            setPaymentType('now'); 
+            updateDisplay(); 
+            backToCategories(); 
+        } 
+    }
+
+    function openCheckoutModal() {
+        if (!document.getElementById('custName').value.trim()) { alert('お客様のお名前を入力してください。'); return; }
+        if (cart.length === 0) { alert('商品が選択されていません。'); return; }
+        var total = 0; cart.forEach(function(i) { total += i.price; });
+        document.getElementById('checkoutTotalPrice').innerText = total.toLocaleString();
+        document.getElementById('checkoutQty').innerText = "お預かり: " + cart.length + "点";
+        
+        if (editingOrderId) {
+            document.getElementById('checkoutModalTitle').innerText = "✏️ 修正内容の確定";
+        } else {
+            document.getElementById('checkoutModalTitle').innerText = "💰 受付・お会計確定";
+        }
+        document.getElementById('checkoutModal').style.display = 'flex';
+    }
+    
+    function closeCheckoutModal() { document.getElementById('checkoutModal').style.display = 'none'; }
+    function setPaymentType(type) {
+        currentPaymentType = type;
+        if(type === 'now') { document.getElementById('pay-now').classList.add('selected'); document.getElementById('pay-later').classList.remove('selected'); } 
+        else { document.getElementById('pay-now').classList.remove('selected'); document.getElementById('pay-later').classList.add('selected'); }
+    }
+
+    function submitOrder() {
+        var name = document.getElementById('custName').value.trim(); 
+        var phone = document.getElementById('custPhone').value.trim();
+        var staffName = document.getElementById('staffNameInput').value.trim() || '未設定';
+        var nowStr = new Date().toLocaleString('ja-JP'); 
+        var todayKey = new Date().toISOString().split('T')[0];
+
+        var confirmBtn = document.getElementById('checkoutConfirmBtn');
+        var originalBtnText = confirmBtn.innerText;
+        confirmBtn.innerText = "⏳ 処理中...";
+        confirmBtn.disabled = true;
+
+        var gpsResolved = false;
+        
+        var gpsTimeout = setTimeout(function() {
+            if (!gpsResolved) {
+                gpsResolved = true;
+                currentGpsLink = "取得不可(アプリ制限等)";
+                executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText);
+            }
+        }, 3000);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    if (!gpsResolved) {
+                        gpsResolved = true;
+                        clearTimeout(gpsTimeout);
+                        // Googleマップで開く正確なリンクに改良
+                        currentGpsLink = "https://www.google.com/maps?q=" + position.coords.latitude + "," + position.coords.longitude;
+                        executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText);
+                    }
+                },
+                function(error) {
+                    if (!gpsResolved) {
+                        gpsResolved = true;
+                        clearTimeout(gpsTimeout);
+                        currentGpsLink = "取得不可(電波エラー)";
+                        executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText);
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 2500, maximumAge: 0 }
+            );
+        } else {
+            if (!gpsResolved) {
+                gpsResolved = true;
+                clearTimeout(gpsTimeout);
+                currentGpsLink = "非対応端末";
+                executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText);
+            }
+        }
+    }
+
+    function executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText) {
+        if (phone) {
+            var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]');
+            var existingIdx = -1;
+            for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) existingIdx = i; }
+            if (existingIdx > -1) { customers[existingIdx].name = name; } else { customers.push({ name: name, phone: phone }); }
+            localStorage.setItem('cleaning_customers', JSON.stringify(customers));
+        }
+
+        var orderTotal = 0; var itemsSummary = []; var startP = globalTagParent; var startC = globalTagChild; var finalP = startP; var finalC = startC;
+        cart.forEach(function(item) { 
+            orderTotal += item.price; 
+            var desc = item.name + (item.memo ? "(" + item.memo + ")" : '');
+            itemsSummary.push(desc + "[" + finalP + "-" + finalC + "]"); 
+            finalC++; if (finalC > 200) { finalC = 1; finalP++; }
+        });
+
+        var tagRangeString = ""; var endP = finalP; var endC = finalC - 1; if (endC === 0) { endC = 200; endP -= 1; }
+        if (cart.length === 1) { tagRangeString = startP + "-" + startC; } 
+        else if (startP === endP) { tagRangeString = startP + "-" + startC + " 〜 " + endC; } 
+        else { tagRangeString = startP + "-" + startC + " 〜 " + endP + "-" + endC; }
+
+        globalTagParent = finalP; globalTagChild = finalC;
+        localStorage.setItem('tagParent', globalTagParent); localStorage.setItem('tagChild', globalTagChild);
+
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var currentOrderId = editingOrderId;
+
+        if (editingOrderId) {
+            var idx = -1;
+            for(var j=0; j<salesHistory.length; j++) { if(salesHistory[j].id === editingOrderId) idx = j; }
+            if (idx > -1) {
+                salesHistory[idx].totalSales = orderTotal;
+                salesHistory[idx].totalQty = cart.length;
+                salesHistory[idx].tagNumber = tagRangeString;
+                salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0;
+                salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0;
+                salesHistory[idx].items = itemsSummary.join(' / ');
+            }
+        } else {
+            currentOrderId = 'ORD-' + Date.now();
+            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
+        }
+
+        localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
+
+        var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
+        if (GAS_URL && GAS_URL.indexOf("http") === 0) {
+            fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) { console.log("送信エラー"); });
+        }
+
+        confirmBtn.innerText = originalBtnText;
+        confirmBtn.disabled = false;
+
+        if (editingOrderId) { 
+            alert("修正内容を上書き保存しました!\n合計金額: ¥" + orderTotal.toLocaleString() + "\n新しいタグ番号: " + tagRangeString); 
+        } else { 
+            alert("受付完了!\n合計金額: ¥" + orderTotal.toLocaleString() + "\nタグ番号: " + tagRangeString); 
+        }
+
+        cart = []; editingOrderId = null; document.getElementById('custName').value = ''; document.getElementById('custPhone').value = ''; 
+        setPaymentType('now'); closeCheckoutModal(); updateDisplay(); backToCategories();
+    }
+
+    function openTodayOrdersModal() { document.getElementById('orderSearchKey').value = ''; renderTodayOrders(); document.getElementById('todayOrdersModal').style.display = 'flex'; }
+    function closeTodayOrdersModal() { document.getElementById('todayOrdersModal').style.display = 'none'; }
+    function renderTodayOrders() {
+        var container = document.getElementById('todayOrdersContainer'); container.innerHTML = '';
+        var searchKey = document.getElementById('orderSearchKey').value.trim().toLowerCase();
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var todayKey = new Date().toISOString().split('T')[0];
+        
+        var todayOrders = [];
+        for(var i = salesHistory.length - 1; i >= 0; i--) { if(salesHistory[i].date === todayKey) todayOrders.push(salesHistory[i]); }
+
+        if (todayOrders.length === 0) { container.innerHTML = '<div style="padding:15px; text-align:center; color:#999;">本日の受付履歴はありません</div>'; return; }
+        todayOrders.forEach(function(order) {
+            if (searchKey && order.customerName.toLowerCase().indexOf(searchKey) === -1) return;
+            var itemDiv = document.createElement('div'); itemDiv.className = 'history-item';
+            var badge = order.status === "取消" ? '<span class="badge-pay-type bg-cancel">取消</span>' : (order.cashReceived > 0 ? '<span class="badge-pay-type bg-now">前金</span>' : '<span class="badge-pay-type bg-later">貸し</span>');
+            var timeDisp = order.timeStr.split(' ')[1] || order.timeStr;
+            var btnHtml = order.status !== "取消" ? '<div class="action-row"><button class="mini-btn mini-btn-success" onclick="modifyOrder(\'' + order.id + '\')">✏️ 修正する</button><button class="mini-btn mini-btn-danger" onclick="cancelOrder(\'' + order.id + '\')">🔴 取消する</button></div>' : '';
+            itemDiv.innerHTML = '<div class="history-summary-line" onclick="toggleOrderAccordion(\'' + order.id + '\')"><div>' + badge + ' <span>' + order.customerName + '様</span> <small style="color:#888; font-weight:normal;">(' + timeDisp + ')</small></div><div>¥' + order.totalSales.toLocaleString() + ' ▾</div></div><div class="history-detail-area" id="detail-' + order.id + '"><div><strong>点数:</strong> ' + order.totalQty + '点</div><div><strong>タグ番号:</strong> ' + order.tagNumber + '</div><div style="font-size:0.75rem; color:#666; margin:4px 0;"><strong>明細:</strong> ' + order.items + '</div><div><strong>担当:</strong> ' + order.staffName + '</div>' + btnHtml + '</div>';
+            container.appendChild(itemDiv);
+        });
+    }
+    function toggleOrderAccordion(id) { var el = document.getElementById("detail-" + id); if(el) el.classList.toggle('active'); }
+    
+    function cancelOrder(id) {
+        if(!confirm("この受付を取り消しますか？")) return;
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); 
+        var idx = -1;
+        for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; }
+        if(idx > -1) {
+            salesHistory[idx].status = "取消"; salesHistory[idx].totalSales = 0; salesHistory[idx].cashReceived = 0; salesHistory[idx].creditAmount = 0; salesHistory[idx].items = "【取消】" + salesHistory[idx].items;
+            localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
+            var cancelPayload = { id: id, status: "取消", totalSales: 0, paymentType: "【取消】", items: salesHistory[idx].items };
+            if (GAS_URL && GAS_URL.indexOf("http") === 0) fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(cancelPayload) }).catch(function(e) {});
+            alert("受付を取り消しました。"); renderTodayOrders();
+        }
+    }
+    
+    function modifyOrder(id) {
+        if(!confirm("この受付内容を修正しますか？\n(レジ画面に呼び戻して、そのまま上書き修正します)")) return;
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); 
+        var idx = -1;
+        for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; }
+        if(idx > -1) {
+            var tgt = salesHistory[idx]; 
+            document.getElementById('custName').value = tgt.customerName; 
+            document.getElementById('custPhone').value = tgt.phone || ''; 
+            cart = [];
+            var itemParts = tgt.items.split(' / '); 
+            itemParts.forEach(function(part) {
+                var cleanName = part.split('[')[0] || "特殊品"; 
+                var nameOnly = cleanName.split('(')[0] || cleanName; 
+                var memoOnly = "";
+                if(cleanName.indexOf('(') > -1) memoOnly = cleanName.split('(')[1].replace(')', '');
+                cart.push({ name: nameOnly, price: Math.floor(tgt.totalSales / tgt.totalQty), memo: memoOnly });
+            });
+            editingOrderId = id;
+            updateDisplay(); closeTodayOrdersModal(); backToCategories(); 
+            alert("データをレジに呼び戻しました！");
+        }
+    }
+
+    function searchCustomerByPhone() {
+        var phone = document.getElementById('custPhone').value.trim(); if (!phone) { alert('電話番号を入力してください。'); return; }
+        var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); 
+        var found = null;
+        for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) found = customers[i]; }
+        if (found) { document.getElementById('custName').value = found.name; alert(found.name + " 様を呼び出しました"); } else { alert('未登録です。'); }
+    }
+    function openCustomerListModal() {
+        var cList = document.getElementById('customerListContainer'); cList.innerHTML = ''; 
+        var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]');
+        if (customers.length === 0) cList.innerHTML = '<div style="padding:15px;text-align:center;color:#999;">名簿が空です</div>';
+        customers.forEach(function(c) {
+            var div = document.createElement('div'); div.className = 'history-item'; div.style.cursor = 'pointer'; 
+            div.innerHTML = '<div><strong>' + c.name + ' 様</strong></div><div>📞 ' + c.phone + '</div>';
+            div.onclick = function() { document.getElementById('custName').value = c.name; document.getElementById('custPhone').value = c.phone; closeCustomerModal(); }; 
+            cList.appendChild(div);
+        }); 
+        document.getElementById('customerModal').style.display = 'flex';
+    }
+    function closeCustomerModal() { document.getElementById('customerModal').style.display = 'none'; }
+    function openReportModal() { calculateReport(); document.getElementById('reportModal').style.display = 'flex'; }
+    function closeReportModal() { document.getElementById('reportModal').style.display = 'none'; }
+    
+    function calculateReport() {
+        var targetDate = document.getElementById('reportDatePicker').value; 
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var tSales = 0; var tCash = 0; var tCredit = 0; var cCount = 0; var tItems = 0;
+        salesHistory.forEach(function(r) { 
+            if (r.date === targetDate) { 
+                tSales += r.totalSales; tCash += r.cashReceived; tCredit += r.creditAmount; 
+                if (r.status !== "取消") cCount++; 
+                tItems += (r.totalQty || 0); 
+            } 
+        });
+        document.getElementById('repTotalSales').innerText = tSales.toLocaleString(); 
+        document.getElementById('repTotalCash').innerText = tCash.toLocaleString(); 
+        document.getElementById('repTotalCredit').innerText = tCredit.toLocaleString(); 
+        document.getElementById('repCustomerCount').innerText = cCount; 
+        document.getElementById('repTotalItems').innerText = tItems;
+    }
+    
+    function sendDailyReportToSpreadsheet() {
+        var targetDate = document.getElementById('reportDatePicker').value; 
+        var memo = document.getElementById('reportDailyMemo').value.trim(); 
+        var sales = document.getElementById('repTotalSales').innerText.replace(/,/g, ''); 
+        var qty = document.getElementById('repTotalItems').innerText; 
+        var count = document.getElementById('repCustomerCount').innerText;
+        
+        var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, dailyMemo: memo };
+        if (GAS_URL && GAS_URL.indexOf("http") === 0) {
+            fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(reportPayload) }).catch(function(e) { console.log("送信エラー"); });
+            alert("本日（" + targetDate + "）の集計データをスプレッドシートに送信しました！"); 
+            closeReportModal();
+        } else { 
+            alert("※URLが設定されていません"); 
+            closeReportModal(); 
+        }
+    }
+</script>
+
+</body>
+</html>

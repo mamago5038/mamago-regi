@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>クリーニング受付 現場対応版 Vol.27</title>
+    <title>クリーニング受付 現場対応版 Vol.28</title>
     <style>
         :root { --main-green: #4a7c59; --light-green: #eef5f0; --border-color: #c8d6cc; --danger: #c0392b; --text-dark: #2c3e50; --bg-gray: #f4f7f5; --edit-orange: #e67e22; }
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: calc(30px + env(safe-area-inset-bottom)); box-sizing: border-box; }
@@ -105,25 +105,31 @@
         .report-label { font-size: 0.8rem; color: #666; font-weight: bold; }
         .report-val { font-size: 1.4rem; font-weight: bold; color: #2d5a27; margin-top: 4px; }
 
-        /* 🔒 新規追加：パスコード画面のスタイル */
+        /* 🔒 パスコード画面のスタイル */
         #lock-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; }
         #lock-screen input { padding:15px; font-size:24px; text-align:center; width:150px; border-radius:4px; border:none; margin-top:20px; letter-spacing: 5px; }
         #lock-error { color:#e74c3c; margin-top:10px; font-weight:bold; height:20px; }
 
-        /* 🖨️ 新規追加：印刷用レイアウト（80mm幅最適化） */
+        /* 🖨️ テストコードを反映した印刷用レイアウト（80mm幅最適化） */
         #receipt-print-area { display: none; }
         @media print {
+            @page { margin: 0; }
             body > * { display: none !important; }
-            #receipt-print-area { display: block !important; width: 80mm; margin: 0; padding: 0; font-family: monospace; color: #000; background: #fff; font-size: 14px; line-height: 1.4; }
+            #receipt-print-area { display: block !important; width: 72mm; margin: 0 auto; padding-top: 5mm; padding-bottom: 10mm; font-family: monospace; color: #000; background: #fff; font-size: 14px; line-height: 1.5; }
             #receipt-print-area div { display: block !important; }
-            .p-line { border-top: 1px dashed #000; margin: 5px 0; }
-            .p-double { border-top: 3px double #000; margin: 5px 0; }
-            .p-center { text-align: center; }
-            .p-right { text-align: right; }
-            .p-shop { font-size: 24px; font-weight: bold; text-align: center; margin: 5px 0; }
-            .p-large { font-size: 16px; font-weight: bold; }
-            .p-factory-tag { font-size: 38px; font-weight: bold; text-align: center; border: 2px solid #000; margin: 10px 0; padding: 5px; background: #fff; }
-            .p-factory-item { font-size: 20px; font-weight: bold; }
+            
+            .r-divider { border-top: 1px dashed #000; margin: 10px 0; }
+            .r-double-divider { border-top: 3px double #000; margin: 10px 0; }
+            .r-center { text-align: center; }
+            .r-flex { display: flex; justify-content: space-between; }
+            .r-shop { font-size: 28px; font-weight: bold; text-align: center; margin: 10px 0; }
+            .r-large { font-size: 18px; font-weight: bold; }
+            .r-xlarge { font-size: 24px; font-weight: bold; }
+            
+            /* 工場向け特大クラス */
+            .r-factory-name { font-size: 32px; font-weight: bold; text-align: center; margin: 20px 0 5px 0; padding-bottom: 5px; border-bottom: 2px solid #000; line-height: 1.2; }
+            .r-factory-tag { font-size: 38px; font-weight: bold; text-align: center; border: 2px solid #000; margin: 10px 0; padding: 5px; background: #fff; }
+            .r-factory-item { font-size: 20px; font-weight: bold; }
         }
     </style>
 </head>
@@ -137,7 +143,7 @@
 </div>
 
 <div class="container" id="main-app" style="display:none;">
-    <h2>☁️ ママ号クラウドレジ Vol.27</h2>
+    <h2>☁️ ママ号クラウドレジ Vol.28</h2>
     <div class="status-customer-panel">
         <div class="panel-top">
             <div class="panel-clock-staff">
@@ -171,7 +177,11 @@
 <div id="checkoutModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="checkoutModalTitle">💰 受付・お会計確定</div><div class="checkout-total-box"><div id="checkoutQty" style="font-weight:bold; color:#2d5a27;">お預かり: 0点</div><div style="font-size:0.9rem; color:#555; font-weight:bold; margin-top:5px;">合計請求金額 (税込)</div><div class="checkout-total-amount">¥<span id="checkoutTotalPrice">0</span></div></div><div class="payment-toggle"><div id="pay-now" class="pay-btn selected" onclick="setPaymentType('now')">👇 今すぐお支払い<br><small>(前金)</small></div><div id="pay-later" class="pay-btn" onclick="setPaymentType('later')">📦 仕上がり時払い<br><small>(後金・貸し)</small></div></div><button id="checkoutConfirmBtn" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.15rem;" onclick="submitOrder()">✅ 受付を確定する</button><div class="cancel-link" onclick="closeCheckoutModal()">やり直す（戻る）</div></div></div>
 <div id="customModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">✍️ 特殊品・手入力</div><label style="font-size:0.85rem; font-weight:bold;">商品名:</label><input type="text" id="customItemName" class="modal-text-input" style="margin-bottom:12px;" placeholder="例: 特大ジュータン"><label style="font-size:0.85rem; font-weight:bold;">金額 (税込):</label><input type="number" id="customItemPrice" class="modal-text-input" style="margin-bottom:15px;"><button class="btn btn-primary" style="width:100%; padding:14px;" onclick="addCustomItem()">選択画面へ進む</button><div class="cancel-link" onclick="closeCustomModal()">キャンセル</div></div></div>
 <div id="customerModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">📱 顧客名簿</div><div class="history-list-box" id="customerListContainer" style="max-height:250px;"></div><div class="cancel-link" onclick="closeCustomerModal()">閉じる</div></div></div>
-<div id="reportModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">📊 日次集計レポート</div><div style="margin-bottom:12px; text-align: center;"><input type="date" id="reportDatePicker" onchange="calculateReport()" style="padding:8px; font-size:1rem; border:1px solid #cbd5ce; border-radius:6px;"></div>
+
+<div id="reportModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-title">📊 日次集計レポート</div>
+        <div style="margin-bottom:12px; text-align: center;"><input type="date" id="reportDatePicker" onchange="calculateReport()" style="padding:8px; font-size:1rem; border:1px solid #cbd5ce; border-radius:6px;"></div>
         <div class="report-grid">
             <div class="report-card total"><div class="report-label">① 本日の売上合計 (税込)</div><div class="report-val">¥<span id="repTotalSales">0</span></div></div>
             <div class="report-card"><div class="report-label">② 総お預かり点数</div><div class="report-val" style="color:#000;"><span id="repTotalItems">0</span> 点</div></div>
@@ -180,16 +190,24 @@
             <div class="report-card"><div class="report-label">売掛金 (後金)</div><div class="report-val" style="color:#c0392b; font-size:1.2rem;">¥<span id="repTotalCredit">0</span></div></div>
             <div class="report-card total"><div class="report-label">④ 本日の使用タグ範囲 (自動計算)</div><div class="report-val" style="font-size:1.2rem; color:#d35400;"><span id="repTagRange">なし</span></div></div>
         </div>
-        <div class="modal-section-title">📝 本日の業務日報・メモ</div><textarea id="reportDailyMemo" class="modal-text-input" rows="3" placeholder="例：〇〇様、次回布団の集配希望。" style="resize:none; margin-bottom:15px; font-family:inherit;"></textarea><button class="btn btn-primary" style="width:100%; background:#2c3e50; margin-bottom:10px; padding:14px;" onclick="sendDailyReportToSpreadsheet()">📊 本日の集計を送信して締める</button><button class="btn btn-secondary" onclick="closeReportModal()" style="width:100%;">閉じる</button></div></div>
+        <div class="modal-section-title">📝 本日の業務日報・メモ</div>
+        <textarea id="reportDailyMemo" class="modal-text-input" rows="3" placeholder="例：〇〇様、次回布団の集配希望。" style="resize:none; margin-bottom:15px; font-family:inherit;"></textarea>
+        
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button class="btn" style="background:#e67e22; flex:1; padding: 12px 5px; font-size: 0.9rem;" onclick="printDailyFactory()">🏭 本日の工場控え</button>
+            <button class="btn" style="background:#8e44ad; flex:1; padding: 12px 5px; font-size: 0.9rem;" onclick="printDailyReport()">🧾 日報レシート</button>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; background:#2c3e50; margin-bottom:10px; padding:14px;" onclick="sendDailyReportToSpreadsheet()">📊 本日の集計を送信して締める</button>
+        <button class="btn btn-secondary" onclick="closeReportModal()" style="width:100%;">閉じる</button>
+    </div>
+</div>
 
 <div id="printModal" class="modal-overlay">
     <div class="modal-content" style="text-align: center; border: 4px solid #2ecc71;">
         <h3 style="color:#2ecc71; margin-top:0;">✅ お会計が確定しました！</h3>
-        <p style="font-size:0.9rem; margin-bottom:15px;">レシートを印刷しますか？</p>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button onclick="printReceipt('customer')" class="btn" style="background:#34495e; flex: 1;">📄 お客様控え<br>(お預かり証)</button>
-            <button onclick="printReceipt('factory')" class="btn" style="background:#e67e22; flex: 1;">🏭 工場控え<br>(大文字)</button>
-        </div>
+        <p style="font-size:0.9rem; margin-bottom:15px;">お客様にお預かり証を渡しますか？</p>
+        <button onclick="printReceipt()" class="btn" style="background:#34495e; width: 100%; margin-bottom: 15px; padding: 15px; font-size: 1.1rem;">📄 レシートを印刷する</button>
         <button onclick="closePrintModal()" class="btn btn-secondary" style="width:100%;">閉じる（次の受付へ）</button>
     </div>
 </div>
@@ -199,9 +217,8 @@
 <script>
     // 🔒 パスコード設定
     const PASSCODE = "5038";
-    var currentOrderData = null; // 印刷用にデータを一時保管
+    var currentOrderData = null; 
 
-    // 🔒 パスコード判定
     function checkPasscode() {
         var input = document.getElementById("passcode-input");
         var error = document.getElementById("lock-error");
@@ -250,17 +267,14 @@
     window.onload = function() {
         updateClock();
         if (localStorage.getItem('cleaning_staff_name')) { document.getElementById('staffNameInput').value = localStorage.getItem('cleaning_staff_name'); }
-        // 新規追加：TELの復元
         if (localStorage.getItem('cleaning_staff_tel')) { document.getElementById('staffTelInput').value = localStorage.getItem('cleaning_staff_tel'); }
         
-        // 🚨 日本時間（JST）で今日の日付をセットする処理（時差バグ修正）🚨
         var now = new Date();
         var y = now.getFullYear();
         var m = String(now.getMonth() + 1).padStart(2, '0');
         var d = String(now.getDate()).padStart(2, '0');
         document.getElementById('reportDatePicker').value = y + "-" + m + "-" + d;
         
-        // 新規追加：お届け予定日（3日後）の自動セット
         var delDateObj = new Date();
         delDateObj.setDate(delDateObj.getDate() + 3);
         var dy = delDateObj.getFullYear();
@@ -359,7 +373,6 @@
 
     function submitOrder() {
         var name = document.getElementById('custName').value.trim(); var phone = document.getElementById('custPhone').value.trim(); var staffName = document.getElementById('staffNameInput').value.trim() || '未設定'; var nowStr = new Date().toLocaleString('ja-JP'); 
-        
         var todayKey = document.getElementById('reportDatePicker').value; 
         
         var confirmBtn = document.getElementById('checkoutConfirmBtn'); var originalBtnText = confirmBtn.innerText; confirmBtn.innerText = "⏳ 処理中..."; confirmBtn.disabled = true;
@@ -377,6 +390,8 @@
     function executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText) {
         if (phone) { var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); var existingIdx = -1; for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) existingIdx = i; } if (existingIdx > -1) { customers[existingIdx].name = name; } else { customers.push({ name: name, phone: phone }); } localStorage.setItem('cleaning_customers', JSON.stringify(customers)); }
         var orderTotal = 0; var itemsSummary = []; var startP = globalTagParent; var startC = globalTagChild; var finalP = startP; var finalC = startC;
+        var savedCart = JSON.parse(JSON.stringify(cart)); // 🖨️ レシート印刷用にカートの中身を記憶
+        
         cart.forEach(function(item) { orderTotal += item.price; var desc = item.name + (item.memo ? "(" + item.memo + ")" : ''); itemsSummary.push(desc + "[" + finalP + "-" + finalC + "]"); finalC++; if (finalC > 200) { finalC = 1; finalP++; } });
         var tagRangeString = ""; var endP = finalP; var endC = finalC - 1; if (endC === 0) { endC = 200; endP -= 1; }
         if (cart.length === 1) { tagRangeString = startP + "-" + startC; } else if (startP === endP) { tagRangeString = startP + "-" + startC + " 〜 " + endC; } else { tagRangeString = startP + "-" + startC + " 〜 " + endP + "-" + endC; }
@@ -395,7 +410,7 @@
         var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
         
-        // 🖨️ 新規追加：印刷用データをセット
+        // 🖨️ お客様レシート印刷用のデータをセット
         currentOrderData = {
             orderId: currentOrderId,
             date: nowStr,
@@ -403,6 +418,7 @@
             tel: document.getElementById('staffTelInput').value,
             customer: name,
             itemsSummary: itemsSummary,
+            cartItems: savedCart,
             total: orderTotal,
             payStatus: (currentPaymentType === 'now') ? '前金(支払い済)' : '後金(貸し)',
             delivery: document.getElementById('deliveryDateInput').value,
@@ -414,70 +430,139 @@
         
         cart = []; editingOrderId = null; document.getElementById('custName').value = ''; document.getElementById('custPhone').value = ''; setPaymentType('now'); closeCheckoutModal(); updateDisplay(); backToCategories();
         
-        // 🖨️ 新規追加：お会計後に印刷モーダルを表示（修正の時は出さない場合、条件分岐も可能ですが今回は毎回出します）
+        // お会計後、お客様レシートの印刷確認モーダルを表示
         document.getElementById('printModal').style.display = 'flex';
     }
 
-    // 🖨️ 新規追加：レシート印刷処理（80mm用）
     function closePrintModal() { document.getElementById('printModal').style.display = 'none'; }
     
-    function printReceipt(type) {
+    // 🖨️ 1. お客様用お預かり証（お会計後に印刷）
+    function printReceipt() {
         if (!currentOrderData) return;
         var data = currentOrderData;
         var area = document.getElementById("receipt-print-area");
         var html = "";
         
-        if (type === 'customer') {
-            html += `<div class="p-shop">クリーニングのママ号</div>`;
-            html += `<div class="p-center">[お預かり証 / 領収書]</div>`;
-            html += `<div class="p-line"></div>`;
-            html += `<div>受付日時: ${data.date}</div>`;
-            html += `<div>伝票番号: ${data.orderId}</div>`;
-            html += `<div class="p-line"></div>`;
-            html += `<div>担当スタッフ: ${data.staff}</div>`;
-            html += `<div>連絡先TEL: ${data.tel}</div>`;
-            html += `<div class="p-line"></div>`;
-            html += `<div class="p-large">お客様: ${data.customer} 様</div>`;
-            html += `<div class="p-line"></div>`;
-            html += `<div class="p-center">【お預かり明細】</div>`;
+        html += `<div class="r-center">=========================</div>`;
+        html += `<div class="r-shop">クリーニングの<br>ママ号</div>`;
+        html += `<div class="r-center">=========================</div>`;
+        html += `<div class="r-center">[お預かり証 / 領収書]</div><br>`;
+        html += `<div>受付日時: ${data.date}</div>`;
+        html += `<div>伝票番号: ${data.orderId}</div>`;
+        html += `<div class="r-divider"></div>`;
+        html += `<div>担当スタッフ: ${data.staff}</div>`;
+        html += `<div>連絡先TEL: ${data.tel}</div>`;
+        html += `<div class="r-divider"></div>`;
+        html += `<div class="r-large">お客様: ${data.customer} 様</div>`;
+        html += `<div class="r-divider"></div>`;
+        html += `<div>【お預かり明細】</div><br>`;
+        
+        data.cartItems.forEach(function(item, i) {
+            var match = data.itemsSummary[i].match(/\[(\d+-\d+)\]$/);
+            var tag = match ? match[1] : "";
             
-            data.itemsSummary.forEach(function(itemStr) {
-                html += `<div class="p-large">・${itemStr}</div>`;
-            });
-            
-            html += `<div class="p-line"></div>`;
-            html += `<div class="p-right">お預かり点数: ${data.totalQty} 点</div>`;
-            html += `<div class="p-double"></div>`;
-            html += `<div class="p-right p-large">合計金額(税込): ¥ ${data.total.toLocaleString()}</div>`;
-            html += `<div class="p-right">お支払区分: ${data.payStatus}</div>`;
-            html += `<div class="p-double"></div>`;
-            html += `<div class="p-large">■ お届け予定日</div>`;
-            html += `<div class="p-large" style="font-size:20px; text-align:center; margin:5px 0;">${data.delivery} 頃</div>`;
-            html += `<div class="p-line"></div>`;
-            html += `<div class="p-center">ありがとうございました！</div>`;
-        } else if (type === 'factory') {
-            html += `<div class="p-center" style="font-size:20px; font-weight:bold;">🏭 工場引渡控え 🏭</div>`;
-            html += `<div class="p-line"></div>`;
-            html += `<div>受付: ${data.date}</div>`;
-            html += `<div>顧客: ${data.customer} 様 / 担当: ${data.staff}</div>`;
-            html += `<div class="p-double"></div>`;
-            
-            data.itemsSummary.forEach(function(itemStr) {
-                var match = itemStr.match(/\[(\d+-\d+)\]$/);
-                var tag = match ? match[1] : "";
-                var namePart = itemStr.replace(/\[\d+-\d+\]$/, "");
-                html += `<div class="p-factory-tag">タグ: ${tag}</div>`;
-                html += `<div class="p-factory-item">品名: ${namePart}</div>`;
-                html += `<div class="p-line"></div>`;
-            });
-            
-            html += `<div class="p-right">総点数: ${data.totalQty} 点</div>`;
-            html += `<div class="p-center">【工場保管用】</div>`;
-        }
-
+            html += `<div class="r-large">[${tag}] ${item.name}</div>`;
+            html += `<div class="r-flex"><span>   1点</span><span>¥ ${item.price.toLocaleString()}</span></div>`;
+            if (item.memo) { html += `<div>   💡 ${item.memo}</div>`; }
+            html += `<br>`;
+        });
+        
+        html += `<div class="r-divider"></div>`;
+        html += `<div class="r-flex"><span>お預かり点数:</span><span>${data.totalQty} 点</span></div>`;
+        html += `<div class="r-divider"></div>`;
+        html += `<div class="r-flex r-large"><span>合計金額(税込):</span><span>¥ ${data.total.toLocaleString()}</span></div>`;
+        html += `<div class="r-flex"><span>お支払区分:</span><span>${data.payStatus}</span></div>`;
+        html += `<div class="r-divider"></div>`;
+        html += `<div class="r-large">■ お届け予定日</div>`;
+        html += `<div class="r-large" style="text-align:center; margin:5px 0;">${data.delivery} 頃</div><br>`;
+        html += `<div class="r-center">ありがとうございました！</div>`;
+        html += `<div class="r-center">=========================</div>`;
+        
         area.innerHTML = html;
         window.print();
     }
+
+    // 🖨️ 2. 日報レシート（日次レポートから印刷）
+    function printDailyReport() {
+        var targetDate = document.getElementById('reportDatePicker').value; 
+        var sales = document.getElementById('repTotalSales').innerText;
+        var qty = document.getElementById('repTotalItems').innerText;
+        var count = document.getElementById('repCustomerCount').innerText;
+        var cash = document.getElementById('repTotalCash').innerText;
+        var credit = document.getElementById('repTotalCredit').innerText;
+        var tags = document.getElementById('repTagRange').innerText;
+        var memo = document.getElementById('reportDailyMemo').value.trim();
+
+        var area = document.getElementById("receipt-print-area");
+        var html = `<div class="r-center">=========================</div>`;
+        html += `<div class="r-shop">営業日報</div>`;
+        html += `<div class="r-center">=========================</div>`;
+        html += `<div>営業日: ${targetDate}</div>`;
+        html += `<div>出力日時: ${new Date().toLocaleString('ja-JP')}</div>`;
+        html += `<div class="r-divider"></div>`;
+        
+        html += `<div class="r-flex r-large"><span>売上合計:</span><span>¥ ${sales}</span></div>`;
+        html += `<div class="r-flex"><span>入金高(前金):</span><span>¥ ${cash}</span></div>`;
+        html += `<div class="r-flex"><span>売掛金(後金):</span><span>¥ ${credit}</span></div>`;
+        html += `<div class="r-divider"></div>`;
+        
+        html += `<div class="r-flex r-large"><span>お預かり点数:</span><span>${qty} 点</span></div>`;
+        html += `<div class="r-flex r-large"><span>受付客数:</span><span>${count} 名</span></div>`;
+        html += `<div class="r-divider"></div>`;
+        
+        html += `<div>【使用タグ範囲】</div>`;
+        html += `<div class="r-large r-center">${tags}</div>`;
+        html += `<div class="r-divider"></div>`;
+        
+        if (memo) {
+            html += `<div>【業務日報・メモ】</div>`;
+            html += `<div>${memo.replace(/\n/g, '<br>')}</div>`;
+            html += `<div class="r-divider"></div>`;
+        }
+        
+        area.innerHTML = html;
+        window.print();
+    }
+
+    // 🖨️ 3. 工場控えリスト（日次レポートから印刷：顧客名超特大）
+    function printDailyFactory() {
+        var targetDate = document.getElementById('reportDatePicker').value; 
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var todayOrders = salesHistory.filter(function(r) { return r.date === targetDate && r.status !== "取消"; });
+        
+        if (todayOrders.length === 0) { alert("指定された日の受付データがありません。"); return; }
+
+        var area = document.getElementById("receipt-print-area");
+        var html = `<div class="r-center" style="font-size:24px; font-weight:bold;">🏭 工場引渡リスト</div>`;
+        html += `<div class="r-center">${targetDate}</div>`;
+        html += `<div class="r-double-divider"></div>`;
+        
+        var totalDayItems = 0;
+
+        todayOrders.forEach(function(order) {
+            // お客様名をドカンと大きく表示！
+            html += `<div class="r-factory-name">👤 ${order.customerName} 様</div>`;
+            var itemsArr = order.items.split(' / ');
+            totalDayItems += itemsArr.length;
+            
+            itemsArr.forEach(function(itemStr) {
+                var match = itemStr.match(/(.*)\[(\d+-\d+)\]$/);
+                var namePart = match ? match[1] : itemStr;
+                var tag = match ? match[2] : "";
+                
+                html += `<div class="r-factory-tag">タグ: ${tag}</div>`;
+                html += `<div class="r-factory-item">品名: ${namePart}</div>`;
+                html += `<div class="r-divider"></div>`;
+            });
+        });
+        
+        html += `<div class="r-flex r-xlarge"><span>総点数:</span><span>${totalDayItems} 点</span></div>`;
+        html += `<div class="r-center" style="margin-top:10px;">【工場保管用】</div>`;
+        
+        area.innerHTML = html;
+        window.print();
+    }
+
 
     function openTodayOrdersModal() { document.getElementById('orderSearchKey').value = ''; renderTodayOrders(); document.getElementById('todayOrdersModal').style.display = 'flex'; }
     function closeTodayOrdersModal() { document.getElementById('todayOrdersModal').style.display = 'none'; }

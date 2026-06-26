@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>クリーニング受付 現場対応版 Vol.29</title>
+    <title>クリーニング受付 現場対応版 Vol.30</title>
     <style>
         :root { --main-green: #4a7c59; --light-green: #eef5f0; --border-color: #c8d6cc; --danger: #c0392b; --text-dark: #2c3e50; --bg-gray: #f4f7f5; --edit-orange: #e67e22; }
         body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); padding-bottom: calc(30px + env(safe-area-inset-bottom)); box-sizing: border-box; }
@@ -30,6 +30,13 @@
         .section-block { background: #fafdfb; padding: 12px; border-radius: 12px; border: 1px solid #e8f0ea; margin-bottom: 15px; }
         #categoryView { display: block; }
         #itemsView { display: none; }
+        
+        /* ページング用スタイル */
+        .paging-nav { display: flex; justify-content: space-between; margin-bottom: 12px; background: var(--light-green); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); align-items: center; }
+        .page-indicator { font-size: 0.95rem; font-weight: bold; color: #2d5a27; letter-spacing: 2px; }
+        .nav-btn { background: var(--main-green); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav-btn:active { transform: scale(0.95); }
+
         .large-category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
         .large-cat-btn { padding: 16px 4px; background: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 0.95rem; font-weight: bold; color: #444; cursor: pointer; text-align: center; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .large-cat-btn:active { background: var(--light-green); transform: scale(0.98); }
@@ -118,8 +125,8 @@
             #receipt-print-area { display: block !important; width: 72mm; margin: 0 auto; padding-top: 5mm; padding-bottom: 10mm; font-family: monospace; color: #000; background: #fff; font-size: 14px; line-height: 1.5; }
             #receipt-print-area div { display: block !important; }
             
-            /* 新機能：プリンターのカット（改ページ）指示 */
-            .page-break { page-break-after: always; break-after: page; }
+            /* プリンターのカット（改ページ）指示 */
+            .page-break { display: block !important; page-break-after: always !important; break-after: page !important; margin: 0 !important; padding: 0 !important; height: 1px !important; }
             
             .r-divider { border-top: 1px dashed #000; margin: 10px 0; }
             .r-double-divider { border-top: 3px double #000; margin: 10px 0; }
@@ -146,7 +153,7 @@
 </div>
 
 <div class="container" id="main-app" style="display:none;">
-    <h2>☁️ ママ号クラウドレジ Vol.29</h2>
+    <h2>☁️ ママ号クラウドレジ Vol.30</h2>
     <div class="status-customer-panel">
         <div class="panel-top">
             <div class="panel-clock-staff">
@@ -172,10 +179,21 @@
         </div>
         <div class="sub-action-line"><button class="text-btn" onclick="openCustomerListModal()">📱 顧客名簿から選択</button><span style="font-size: 0.75rem; color: #888;">(✎数字タップで修正)</span></div>
     </div>
+    
     <div class="section-block">
-        <div id="categoryView"><h3>👕 商品カテゴリを選択</h3><div class="large-category-grid" id="largeCategoryContainer"></div><button class="custom-input-btn" onclick="openCustomModal()">✍️ 特殊品・金額を手入力する</button></div>
+        <div id="categoryView">
+            <h3>👕 商品カテゴリを選択</h3>
+            <div class="paging-nav">
+                <button class="nav-btn" onclick="changeCategoryPage(-1)">← 前へ</button>
+                <div id="pageIndicator" class="page-indicator">1 / 3</div>
+                <button class="nav-btn" onclick="changeCategoryPage(1)">次へ →</button>
+            </div>
+            <div class="large-category-grid" id="largeCategoryContainer"></div>
+            <button class="custom-input-btn" onclick="openCustomModal()">✍️ 特殊品・金額を手入力する</button>
+        </div>
         <div id="itemsView"><div class="sub-header"><button class="back-btn" onclick="backToCategories()">🔙 もどる</button><h3 class="sub-title" id="currentCategoryTitle">カテゴリ名</h3></div><div class="item-grid" id="itemGridContainer"></div></div>
     </div>
+    
     <div class="section-block"><h3>📋 お預かり明細</h3><ul id="receiptList" class="receipt-list"><li style="color: #999; justify-content: center; border: none;" id="emptyMessage">商品が選択されていません</li></ul><div class="total-box"><div class="total-label">合計金額 (税込)</div><div class="total-amount">¥<span id="totalPrice">0</span></div></div></div>
     <div class="btn-container"><button class="btn btn-secondary" onclick="resetForm()">クリア</button><button id="checkoutBtnMain" class="btn btn-primary" onclick="openCheckoutModal()">お会計へ進む</button></div>
     <div class="bottom-action-grid"><button class="btn-nav" onclick="openTodayOrdersModal()">📋 本日の受付一覧（修正・取消）</button><button class="btn-nav green" onclick="openReportModal()">📊 日次集計レポート（締める）</button></div>
@@ -254,21 +272,32 @@
     var url_part3 = "/exec";
     var GAS_URL = url_part1 + url_part2 + url_part3;
 
+    // 240アイテムに拡張されたマスターカタログ
     var masterCatalog = {
         "sales": { title: "🎁 セール品", items: [{name: "【セール】ダウンジャケット", price: 1500}, {name: "【セール】コート", price: 800}, {name: "【セール】セーター", price: 300}, {name: "【セール】毛布S", price: 500}] },
-        "shirts": { title: "👔 ワイシャツ類", items: [{name: "ワイシャツ(白・色付)", price: 180}, {name: "ワイシャツ(濃色)", price: 200}, {name: "ワイシャツ(手仕上げ)", price: 300}, {name: "シャツ(綿)", price: 350}, {name: "シャツ(ウール・絹)", price: 400}, {name: "Tシャツ", price: 350}, {name: "ポロシャツ", price: 400}, {name: "学生シャツブラウス", price: 300}, {name: "シャツブラウス", price: 350}, {name: "デザインブラウス", price: 450}, {name: "デザインブラウス(シルク)", price: 500}] },
-        "sweaters": { title: "🧶 ニット類", items: [{name: "セーター(サマー)", price: 450}, {name: "セーター(厚手)", price: 500}, {name: "カーディガン(サマー)", price: 450}, {name: "カーディガン(厚手)", price: 500}, {name: "ニットベスト", price: 400}, {name: "セーター(カシミア)", price: 700}, {name: "セーター(アンゴラ等)", price: 700}, {name: "トレーナー", price: 400}, {name: "フリース", price: 450}, {name: "パーカー", price: 450}, {name: "タンクトップ", price: 350}, {name: "キャミソール", price: 350}, {name: "チュニック", price: 450}, {name: "デザインチュニック", price: 500}] },
-        "jackets": { title: "🧥 上着・ブレザー", items: [{name: "背広・ジャケット", price: 600}, {name: "背広・ジャケット(ロング)", price: 700}, {name: "ブレザー", price: 600}, {name: "ベスト", price: 400}, {name: "事務服(ベスト)", price: 400}, {name: "園児服(衿込で)", price: 400}, {name: "園児ヒダスカート", price: 400}] },
-        "pants": { title: "👖 ズボン・スカート", items: [{name: "スラックス", price: 500}, {name: "婦人ズボン", price: 500}, {name: "綿パン・ジーンズ", price: 450}, {name: "ハーフパンツ", price: 350}, {name: "タイトスカート", price: 450}, {name: "フレアスカート", price: 450}, {name: "キュロットスカート", price: 450}, {name: "ロングスカート", price: 500}, {name: "ヒダスカート", price: 500}, {name: "プリーツスカート", price: 600}, {name: "ベルベットスカート", price: 600}] },
-        "dress": { title: "👗 ドレス・ワンピース", items: [{name: "ワンピース(ニット)", price: 700}, {name: "ワンピース(ポリエステル)", price: 800}, {name: "ワンピース(綿)", price: 800}, {name: "ワンピース(綿ポリ)", price: 800}, {name: "ワンピース(ベルベット)", price: 1000}, {name: "オールインワン", price: 800}, {name: "パーティードレス", price: 1500}, {name: "イブニングドレス", price: 3000}, {name: "ボレロ", price: 500}, {name: "子供パーティードレス", price: 500}] },
-        "formal": { title: "🎩 礼服・モーニング", items: [{name: "モーニング(上)", price: 2000}, {name: "モーニング(下)", price: 600}, {name: "モーニング(ベスト)", price: 500}, {name: "礼服(紳士) 上", price: 900}, {name: "礼服(紳士) 下", price: 600}, {name: "礼服(婦人) 上", price: 600}, {name: "礼服(婦人) ズボン", price: 500}, {name: "礼服(婦人) スカート", price: 500}, {name: "礼服(婦人) ブラウス", price: 500}, {name: "礼服(婦人) ワンピース", price: 1000}] },
-        "outers": { title: "❄️ 防寒・アウター", items: [{name: "防寒ベスト", price: 600}, {name: "ジャンパー裏なし", price: 650}, {name: "ジャンパー裏有り", price: 700}, {name: "防寒ズボン", price: 650}, {name: "ベンチコート", price: 850}, {name: "コート", price: 900}, {name: "コート(ロング)", price: 1200}, {name: "トレンチコート", price: 1500}, {name: "ベルベットコート", price: 1500}, {name: "ママコート", price: 1500}, {name: "ダウンベスト", price: 1200}, {name: "ライトダウン", price: 1200}, {name: "ダウンジャケット", price: 2000}, {name: "ダウンコート", price: 2700}, {name: "スキーウェア(上)", price: 1200}, {name: "スキーウェア(下)", price: 800}, {name: "子供スキーウェア(上)", price: 550}, {name: "子供スキーウェア(下)", price: 650}, {name: "ジャンプスーツ(130迄)", price: 1100}, {name: "ジャンプスーツ(130～)", price: 1600}, {name: "スキー手袋(大人)", price: 700}, {name: "スキー手袋(子供)", price: 550}, {name: "手袋(ニット)", price: 350}] },
-        "kotatsu": { title: "🛏️ こたつ・毛布", items: [{name: "こたつ布団(正方形·掛)", price: 1500}, {name: "こたつ布団(正方形·敷)", price: 1300}, {name: "こたつ布団(長方形·掛)", price: 2000}, {name: "こたつ布団(長方形·敷)", price: 1600}, {name: "タオルケット/綿毛布 S", price: 600}, {name: "タオルケット/綿毛布 W", price: 900}, {name: "毛布 S (1枚物)", price: 700}, {name: "毛布 W (1枚物)", price: 900}, {name: "毛布 S (合わせ)", price: 900}, {name: "毛布 W (合わせ)", price: 1700}, {name: "ベビー毛布・ひざ掛け", price: 400}, {name: "毛布丹前", price: 800}, {name: "毛布布団 S", price: 2500}, {name: "毛布布団 W", price: 3000}, {name: "電気毛布", price: 1500}, {name: "ベッドパット S", price: 1100}, {name: "ベッドパット W", price: 1600}, {name: "肌掛布団", price: 800}, {name: "寝袋(ダウン)", price: 2100}, {name: "敷パット/敷毛布 S", price: 700}, {name: "敷パット/敷毛布 W", price: 900}, {name: "敷毛布 綿入り S", price: 1000}, {name: "敷毛布 綿入り W", price: 1300}] },
-        "sheets": { title: "🪑 シーツ・カバー", items: [{name: "イスカバー(小)", price: 450}, {name: "イスカバー(中)", price: 550}, {name: "イスカバー(大)", price: 650}, {name: "テーブルクロス(綿)", price: 450}, {name: "テーブルクロス(レース)", price: 500}, {name: "カーテン(ウール)", price: 850}, {name: "レースカーテン", price: 750}, {name: "紅白幕(2m×2m)", price: 1100}, {name: "のぼり(180x60)", price: 500}, {name: "掛布団側", price: 700}, {name: "敷布団側", price: 650}, {name: "のれん", price: 300}, {name: "シーツ S", price: 350}, {name: "シーツ W", price: 600}, {name: "タオル・ボアシーツ S", price: 400}, {name: "タオル・ボアシーツ W", price: 650}, {name: "布団カバー S", price: 450}, {name: "布団カバー W", price: 650}, {name: "枕カバー", price: 200}, {name: "座布団カバー(白)", price: 200}, {name: "座布団カバー(色柄)", price: 250}, {name: "シートカバー", price: 250}, {name: "チャイルドシートカバー", price: 550}, {name: "マルチカバー(正方形)", price: 850}, {name: "マルチカバー(長方形)", price: 1100}, {name: "鏡", price: 650}] },
-        "school": { title: "🎒 学生服・作業着", items: [{name: "学生服(ツメエリ)", price: 600}, {name: "学生ズボン", price: 500}, {name: "セーラー服(夏・冬)", price: 500}, {name: "学生ヒダスカート", price: 550}, {name: "学生スカーフ", price: 150}, {name: "ボウタイ", price: 150}, {name: "はちまき", price: 150}, {name: "ユニフォーム(上)", price: 400}, {name: "ユニフォーム(下)", price: 350}, {name: "ジャージ(上)", price: 400}, {name: "ジャージ(下)", price: 350}, {name: "柔道着(上)", price: 600}, {name: "柔道着(下)", price: 400}, {name: "柔道着(帯)", price: 200}, {name: "剣道着(上)", price: 600}, {name: "剣道着(袴)", price: 1100}, {name: "まわし", price: 1300}, {name: "作業着", price: 400}, {name: "作業ズボン", price: 450}, {name: "作業シャツ", price: 350}, {name: "作業ツナギ", price: 600}, {name: "防寒ツナギ", price: 1200}, {name: "白衣(ワンピース)", price: 400}, {name: "白衣(長)", price: 350}, {name: "白衣(半)", price: 250}, {name: "白衣(コック用)", price: 300}, {name: "エプロン", price: 250}, {name: "前かけ", price: 200}, {name: "かっぽう着", price: 300}, {name: "白ズボン", price: 350}, {name: "ナースキャップ", price: 250}, {name: "三角巾", price: 150}, {name: "ハンチング・ベレー帽", price: 350}, {name: "野球帽・登山帽", price: 350}, {name: "毛糸帽", price: 300}, {name: "コック帽(長)", price: 350}, {name: "コック帽(短)", price: 300}, {name: "白帽子", price: 300}, {name: "警察帽子", price: 400}] },
-        "matsuri": { title: "🏮 祭り物・浴衣", items: [{name: "さらし(一反)", price: 450}, {name: "足袋(白・黒・柄)", price: 350}, {name: "地下足袋", price: 500}, {name: "祭り用浴衣", price: 600}, {name: "色浴衣", price: 1000}, {name: "綿入半天", price: 750}, {name: "半天(袖なし)", price: 550}, {name: "半天(大)", price: 550}, {name: "半天(中)", price: 500}, {name: "半天(小)", price: 350}, {name: "半天(ひも)", price: 150}, {name: "おこし", price: 300}, {name: "たすき", price: 250}, {name: "しごき", price: 250}, {name: "帯(祭り用)", price: 350}, {name: "腹巻(伊達巻)", price: 350}, {name: "腹あて(三角)", price: 300}, {name: "またひき", price: 450}, {name: "鯉のぼり(3mセット)", price: 3100}, {name: "鯉のぼり(5mセット)", price: 5100}, {name: "和装 肌着(上)", price: 300}, {name: "和装 オコシ(下)", price: 300}, {name: "和装 長肌着", price: 500}, {name: "丹前下", price: 500}, {name: "丹前(綿入り)", price: 1600}, {name: "丹前(ウール)", price: 1100}, {name: "パジャマ(上・下)", price: 550}, {name: "パジャマ(シルク上下)", price: 650}, {name: "ケープ", price: 400}, {name: "肌着(らくだ)", price: 400}, {name: "ももひき(らくだ)", price: 400}, {name: "ガウン(目安)", price: 850}, {name: "おくるみ", price: 500}, {name: "ねんねこ", price: 1600}, {name: "ベビードレス(帽子)", price: 550}, {name: "亀甲(冬用)", price: 500}, {name: "亀甲(夏用)", price: 450}] },
-        "others": { title: "✨ 小物・加工", items: [{name: "ネクタイ", price: 350}, {name: "スコットタイ", price: 350}, {name: "マフラー", price: 350}, {name: "スカーフ", price: 400}, {name: "ストール", price: 450}, {name: "ソックス", price: 250}, {name: "手拭い", price: 150}, {name: "バスタオル", price: 250}, {name: "フェイスタオル", price: 150}, {name: "仏敷", price: 1000}, {name: "防水・撥水加工", price: 550}, {name: "付属品1点につき", price: 50}, {name: "りぼん", price: 50}, {name: "ベルト", price: 50}, {name: "フード", price: 50}, {name: "ダウンフード", price: 200}, {name: "ライナー", price: 100}, {name: "ダウンライナー(袖無)", price: 500}, {name: "ファー(アクリル系)", price: 50}, {name: "ファー(ラビット等)", price: 500}, {name: "裏付(+)", price: 50}, {name: "ロング(+)", price: 200}, {name: "ワンピースプリーツ(+)", price: 300}, {name: "のり強目", price: 50}, {name: "のりなし", price: 50}, {name: "漂白", price: 100}] }
+        "shirts": { title: "👔 シャツ・ブラウス類", items: [{name:"ワイシャツ（白・色付）",price:180},{name:"ワイシャツ（濃色）",price:250},{name:"ワイシャツ（手仕上げ）",price:350},{name:"シャツ（綿）",price:400},{name:"シャツ（レーヨン・テンセル・シルク）",price:500},{name:"シャツ（ウール・麻）",price:450},{name:"Tシャツ",price:400},{name:"ポロシャツ",price:450},{name:"学生シャツブラウス",price:350},{name:"シャツブラウス",price:400},{name:"デザインブラウス",price:500},{name:"デザインブラウス（シルク）",price:600}] },
+        "bottoms": { title: "👖 ボトムス", items: [{name:"スラックス",price:550},{name:"婦人ズボン",price:550},{name:"綿パン・ジーンズ",price:500},{name:"ハーフパンツ",price:400},{name:"タイトスカート",price:500},{name:"フレアスカート",price:500},{name:"キュロットスカート",price:500},{name:"ロングスカート",price:600},{name:"ヒダスカート",price:600},{name:"プリーツスカート",price:700},{name:"ベルベットスカート",price:700}] },
+        "jackets": { title: "🧥 上着", items: [{name:"背広・ジャケット",price:700},{name:"背広・ジャケット（ロング）",price:800},{name:"ブレザー",price:700},{name:"ベスト",price:450},{name:"事務服（ベスト）",price:450},{name:"園児服（衿込で）",price:450},{name:"園児ヒダスカート",price:450}] },
+        "sweaters": { title: "🧶 セーター類", items: [{name:"セーター（サマー）",price:500},{name:"セーター（サマー・厚手）",price:600},{name:"カーディガン（サマー）",price:500},{name:"カーディガン（サマー・厚手）",price:600},{name:"ニットベスト",price:450},{name:"セーター（カシミア）",price:850},{name:"セーター（アンゴラ・モヘア）",price:850},{name:"トレーナー",price:500},{name:"フリース",price:550},{name:"パーカー",price:550},{name:"タンクトップ",price:400},{name:"キャミソール",price:400},{name:"裏付",price:50},{name:"ロング",price:250}] },
+        "dress": { title: "👗 ワンピース類", items: [{name:"ワンピース（ニット）",price:800},{name:"ワンピース（ポリエステル）",price:900},{name:"ワンピース（綿）",price:900},{name:"ワンピース（綿・ポリ）",price:900},{name:"ワンピース（ベルベット）",price:1200},{name:"ワンピース（プリーツ）",price:500},{name:"オールインワン",price:950},{name:"チュニック",price:550},{name:"デザインチュニック",price:600},{name:"パーティードレス",price:1800},{name:"イブニングドレス",price:4000},{name:"ボレロ",price:500},{name:"子供パーティードレス（130cm以下）",price:700}] },
+        "ties": { title: "👔 ネクタイ類", items: [{name:"ネクタイ",price:400},{name:"スコットタイ",price:400},{name:"マフラー",price:400},{name:"スカーフ",price:450},{name:"ストール",price:500}] },
+        "outers": { title: "❄️ 防寒着", items: [{name:"防寒ベスト",price:700},{name:"ジャンパー裏なし",price:750},{name:"ジャンパー裏有り",price:850},{name:"防寒ズボン",price:750},{name:"ベンチコート",price:1000},{name:"コート",price:1000},{name:"コート（ロング）",price:1400},{name:"トレンチコート",price:1800},{name:"ベルベットコート",price:1800},{name:"ママコート",price:1800},{name:"ダウンベスト",price:1400},{name:"ライトダウン",price:1400},{name:"ダウンジャケット",price:2400},{name:"ダウンコート",price:3000},{name:"スキー・ボードウェア（上）",price:1400},{name:"スキー・ボードウェア（下）",price:950},{name:"子供スキーウェア（上・130cm迄）",price:650},{name:"子供スキーウェア（下・130cm迄）",price:750},{name:"ジャンプスーツ（130cm迄）",price:1300},{name:"ジャンプスーツ（130cm〜）",price:1900},{name:"スキー手袋（大人）",price:800},{name:"スキー手袋（子供）",price:650},{name:"手袋（ニット）",price:450}] },
+        "formal": { title: "🎩 礼服類", items: [{name:"モーニング（上）",price:2500},{name:"モーニング（下）",price:700},{name:"モーニング（ベスト）",price:600},{name:"礼服（紳士）上",price:1000},{name:"礼服（紳士）下",price:700},{name:"礼服（婦人）上",price:750},{name:"礼服（婦人）ズボン",price:600},{name:"礼服（婦人）スカート",price:600},{name:"礼服（婦人）ブラウス",price:600},{name:"礼服（婦人）ワンピース",price:1200}] },
+        "school": { title: "🎒 学生・スポーツ", items: [{name:"学生服（ツメエリ）",price:700},{name:"学生ズボン",price:600},{name:"セーラー服（夏・冬）",price:600},{name:"学生ヒダスカート",price:700},{name:"学生スカーフ",price:200},{name:"ボウタイ",price:200},{name:"はちまき",price:200},{name:"ユニフォーム（上）",price:450},{name:"ユニフォーム（下）",price:400},{name:"ジャージ（上）",price:500},{name:"ジャージ（下）",price:400},{name:"柔道着（上）",price:800},{name:"柔道着（下）",price:600},{name:"柔道着（帯）",price:250},{name:"剣道着（上）",price:800},{name:"剣道着（袴）",price:1300},{name:"まわし",price:1550}] },
+        "bedding": { title: "🛏️ 寝具類", items: [{name:"タオルケット／綿毛布 S",price:700},{name:"タオルケット／綿毛布 W",price:1000},{name:"バスタオル",price:350},{name:"フェイスタオル",price:300},{name:"毛布 S（1枚物）",price:800},{name:"毛布 W（1枚物）",price:1000},{name:"毛布 S（合わせ）",price:1000},{name:"毛布 W（合わせ）",price:1900},{name:"ベビー毛布・ひざ掛け",price:500},{name:"毛布丹前",price:900},{name:"毛布布団 S",price:2500},{name:"毛布布団 W",price:3000},{name:"電気毛布",price:1800},{name:"ベッドパット S",price:1300},{name:"ベッドパット W",price:1900},{name:"肌掛布団",price:900},{name:"寝袋（ダウン）",price:2500},{name:"鏡",price:700},{name:"敷パット／敷毛布 S",price:800},{name:"敷パット／敷毛布 W",price:1000},{name:"敷毛布 綿入り S",price:1200},{name:"敷毛布 綿入り W",price:1500},{name:"こたつ布団（正方形・掛）",price:1800},{name:"こたつ布団（正方形・敷）",price:1500},{name:"こたつ布団（長方形・掛）",price:2400},{name:"こたつ布団（長方形・敷）",price:1900}] },
+        "covers": { title: "🪑 カバー・カーテン類", items: [{name:"シーツ S",price:400},{name:"シーツ W",price:700},{name:"タオル・ボアシーツ S",price:500},{name:"タオル・ボアシーツ W",price:800},{name:"布団カバー S",price:500},{name:"布団カバー W",price:700},{name:"枕カバー",price:250},{name:"座布団カバー（白）",price:250},{name:"座布団カバー（色・柄）",price:300},{name:"シートカバー（1点当り）",price:250},{name:"チャイルドシートカバー",price:550},{name:"マルチカバー（正方形）",price:1000},{name:"マルチカバー（長方形）",price:1300},{name:"イスカバー（小）1人用",price:450},{name:"イスカバー（中）2人用",price:550},{name:"イスカバー（大）3人用",price:650},{name:"テーブルクロス（綿）",price:550},{name:"テーブルクロス（レース）",price:600},{name:"カーテン（ウール）1枚",price:1000},{name:"レースカーテン 1枚",price:900},{name:"紅白幕（2m×2m）",price:1300},{name:"のぼり（180cm×60cm）",price:600},{name:"掛布団側",price:800},{name:"敷布団側",price:800},{name:"のれん",price:350}] },
+        "white": { title: "🥼 白衣類", items: [{name:"白衣（ワンピース）",price:450},{name:"白衣（長）",price:400},{name:"白衣（半）",price:300},{name:"白衣（コック用）",price:350},{name:"エプロン",price:300},{name:"前かけ",price:300},{name:"かっぽう着",price:350},{name:"白ズボン",price:400},{name:"スクラブ",price:400},{name:"三角巾",price:200}] },
+        "matsuri": { title: "🏮 祭り物・その他", items: [{name:"祭り用浴衣",price:700},{name:"色浴衣",price:1200},{name:"綿入半天",price:900},{name:"綿入半天（袖なし）",price:650},{name:"半天（大）",price:650},{name:"半天（中）",price:600},{name:"半天（小）",price:400},{name:"半天（ひも）",price:200},{name:"おこし",price:350},{name:"たすき",price:300},{name:"しごき",price:300},{name:"帯（祭り用）",price:400},{name:"腹巻（伊達巻）",price:400},{name:"腹あて（三角）",price:350},{name:"またひき",price:500},{name:"さらし（一反）",price:500},{name:"足袋（白・黒・柄）",price:400},{name:"地下足袋",price:600},{name:"ソックス",price:300},{name:"手拭い",price:200},{name:"和装 肌着（上）",price:400},{name:"和装 オコシ（下）",price:400},{name:"和装 長肌着",price:600},{name:"丹前下",price:600},{name:"丹前（綿入り）",price:2000},{name:"丹前（ウール）",price:1300},{name:"パジャマ（上・下）",price:650},{name:"パジャマ（シルク上・下）",price:800},{name:"ケープ",price:450},{name:"肌着（らくだ）",price:450},{name:"ももひき（らくだ）",price:450},{name:"ガウン",price:1500},{name:"おくるみ",price:600},{name:"ねんねこ",price:1900},{name:"ベビードレス（帽子付）",price:700},{name:"亀甲（冬用）",price:600},{name:"亀甲（夏用）",price:600},{name:"鯉のぼり（3mセット）",price:4000},{name:"鯉のぼり（5mセット）",price:6000},{name:"仏敷",price:1200},{name:"防水・撥水加工",price:700},{name:"付属品1点につき",price:50},{name:"りぼん",price:50},{name:"ベルト",price:50},{name:"フード",price:50},{name:"ダウンフード",price:200},{name:"ライナー",price:150},{name:"ダウンライナー（袖なし）",price:600},{name:"ファー（アクリル系）",price:50},{name:"ファー（ラビット等）",price:2000},{name:"ラビットファー（工場で洗う場合）",price:600},{name:"子供服（130cm迄）",price:100},{name:"のり強目",price:100},{name:"のりなし",price:100},{name:"漂白",price:200}] },
+        "hats": { title: "🧢 帽子", items: [{name:"ハンチング・ベレー帽",price:400},{name:"野球帽・登山帽",price:400},{name:"毛糸帽",price:400},{name:"コック帽（長）",price:400},{name:"コック帽（短）",price:400},{name:"白帽子",price:400},{name:"警察帽子",price:500}] }
     };
+
+    // ページング設定
+    var pageLayout = [
+        ['sales', 'shirts', 'bottoms', 'jackets', 'sweaters', 'dress', 'ties'],
+        ['outers', 'formal', 'school', 'bedding', 'covers'],
+        ['white', 'matsuri', 'hats']
+    ];
+    var currentCatPage = 0;
 
     var cart = []; 
     var currentPaymentType = 'now';
@@ -310,7 +339,30 @@
         localStorage.setItem('cleaning_staff_tel', document.getElementById('staffTelInput').value.trim()); 
     }
 
-    function buildDrillDownMenu() { var catContainer = document.getElementById('largeCategoryContainer'); catContainer.innerHTML = ''; Object.keys(masterCatalog).forEach(function(key) { var btn = document.createElement('button'); btn.className = "large-cat-btn " + (key === 'sales' ? 'sales-btn' : ''); btn.innerText = masterCatalog[key].title; btn.onclick = function() { openCategory(key); }; catContainer.appendChild(btn); }); }
+    // ページ切り替えとカテゴリ表示の構築
+    function changeCategoryPage(dir) {
+        currentCatPage += dir;
+        if(currentCatPage < 0) currentCatPage = 0;
+        if(currentCatPage >= pageLayout.length) currentCatPage = pageLayout.length - 1;
+        buildDrillDownMenu();
+    }
+
+    function buildDrillDownMenu() { 
+        var catContainer = document.getElementById('largeCategoryContainer'); 
+        catContainer.innerHTML = ''; 
+        document.getElementById('pageIndicator').innerText = (currentCatPage + 1) + " / " + pageLayout.length;
+        
+        pageLayout[currentCatPage].forEach(function(key) { 
+            if(masterCatalog[key]) {
+                var btn = document.createElement('button'); 
+                btn.className = "large-cat-btn " + (key === 'sales' ? 'sales-btn' : ''); 
+                btn.innerText = masterCatalog[key].title; 
+                btn.onclick = function() { openCategory(key); }; 
+                catContainer.appendChild(btn); 
+            }
+        }); 
+    }
+
     function openCategory(key) { document.getElementById('categoryView').style.display = 'none'; document.getElementById('itemsView').style.display = 'block'; document.getElementById('currentCategoryTitle').innerText = masterCatalog[key].title; var itemGrid = document.getElementById('itemGridContainer'); itemGrid.innerHTML = ''; masterCatalog[key].items.forEach(function(item) { var card = document.createElement('div'); card.className = 'item-card'; card.onclick = function() { openQuantityModal(item.name, item.price, key); }; card.innerHTML = '<span class="item-name">' + item.name + '</span><span class="item-price">¥' + item.price.toLocaleString() + '</span>'; itemGrid.appendChild(card); }); }
     function backToCategories() { document.getElementById('itemsView').style.display = 'none'; document.getElementById('categoryView').style.display = 'block'; }
 
@@ -321,7 +373,7 @@
         document.getElementById('modalCustomMemo').value = ''; document.getElementById('modalExtraFee').value = '';
         document.getElementById('manualInputArea').style.display = 'none'; document.getElementById('normalCountGrid').style.display = 'grid';
         if (name.indexOf('ワイシャツ') > -1) { document.getElementById('ysColorSection').style.display = 'block'; } else { document.getElementById('ysColorSection').style.display = 'none'; }
-        if (['kotatsu', 'sheets', 'matsuri', 'others'].indexOf(categoryKey) > -1) { document.getElementById('finishingOptionsSection').style.display = 'none'; } else { document.getElementById('finishingOptionsSection').style.display = 'block'; }
+        if (['bedding', 'covers', 'matsuri', 'hats'].indexOf(categoryKey) > -1) { document.getElementById('finishingOptionsSection').style.display = 'none'; } else { document.getElementById('finishingOptionsSection').style.display = 'block'; }
         if (['outers'].indexOf(categoryKey) > -1) { document.getElementById('waterproofSection').style.display = 'block'; } else { document.getElementById('waterproofSection').style.display = 'none'; }
         updateModalUi(); document.getElementById('quantityModal').style.display = 'flex';
     }
@@ -407,7 +459,7 @@
     function executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText) {
         if (phone) { var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); var existingIdx = -1; for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) existingIdx = i; } if (existingIdx > -1) { customers[existingIdx].name = name; } else { customers.push({ name: name, phone: phone }); } localStorage.setItem('cleaning_customers', JSON.stringify(customers)); }
         var orderTotal = 0; var itemsSummary = []; var startP = globalTagParent; var startC = globalTagChild; var finalP = startP; var finalC = startC;
-        var savedCart = JSON.parse(JSON.stringify(cart)); // 🖨️ レシート印刷用にカートの中身を記憶
+        var savedCart = JSON.parse(JSON.stringify(cart));
         
         cart.forEach(function(item) { orderTotal += item.price; var desc = item.name + (item.memo ? "(" + item.memo + ")" : ''); itemsSummary.push(desc + "[" + finalP + "-" + finalC + "]"); finalC++; if (finalC > 200) { finalC = 1; finalP++; } });
         var tagRangeString = ""; var endP = finalP; var endC = finalC - 1; if (endC === 0) { endC = 200; endP -= 1; }
@@ -427,7 +479,6 @@
         var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
         
-        // 🖨️ お客様レシート印刷用のデータをセット
         currentOrderData = {
             orderId: currentOrderId,
             date: nowStr,
@@ -447,13 +498,11 @@
         
         cart = []; editingOrderId = null; document.getElementById('custName').value = ''; document.getElementById('custPhone').value = ''; setPaymentType('now'); closeCheckoutModal(); updateDisplay(); backToCategories();
         
-        // お会計後、お客様レシートの印刷確認モーダルを表示
         document.getElementById('printModal').style.display = 'flex';
     }
 
     function closePrintModal() { document.getElementById('printModal').style.display = 'none'; }
     
-    // 🖨️ 1. お客様用お預かり証（お会計後に印刷）
     function printReceipt() {
         if (!currentOrderData) return;
         var data = currentOrderData;
@@ -499,7 +548,6 @@
         window.print();
     }
 
-    // 🖨️ 2. 日報レシート（日次レポートから印刷）
     function printDailyReport() {
         var targetDate = document.getElementById('reportDatePicker').value; 
         var sales = document.getElementById('repTotalSales').innerText;
@@ -541,7 +589,6 @@
         window.print();
     }
 
-    // 🖨️ 3. 工場控えリスト（新機能：お客様ごとに改ページ）
     function printDailyFactory() {
         var targetDate = document.getElementById('reportDatePicker').value; 
         var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
@@ -554,13 +601,11 @@
         html += `<div class="r-center">${targetDate}</div>`;
         html += `<div class="r-double-divider"></div>`;
         
-        // 最初のタイトルの直後で一度カット
         html += `<div class="page-break"></div>`;
         
         var totalDayItems = 0;
 
         todayOrders.forEach(function(order) {
-            // お客様ごとにブロックを開始し、ページブレーク（カット）を設定
             html += `<div class="page-break">`;
             html += `<div class="r-factory-name">👤 ${order.customerName} 様</div>`;
             var itemsArr = order.items.split(' / ');
@@ -575,12 +620,11 @@
                 html += `<div class="r-factory-item">品名: ${namePart}</div>`;
                 html += `<div class="r-divider"></div>`;
             });
-            html += `</div>`; // page-breakブロックの終わり
+            html += `</div>`;
         });
         
         html += `<div class="r-flex r-xlarge"><span>総点数:</span><span>${totalDayItems} 点</span></div>`;
         html += `<div class="r-center" style="margin-top:10px;">【工場保管用】</div>`;
-        // 最後の総点数も単独でカット
         html += `<div class="page-break"></div>`;
         
         area.innerHTML = html;
@@ -608,7 +652,6 @@
     function openCustomerListModal() { var cList = document.getElementById('customerListContainer'); cList.innerHTML = ''; var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); if (customers.length === 0) cList.innerHTML = '<div style="padding:15px;text-align:center;color:#999;">名簿が空です</div>'; customers.forEach(function(c) { var div = document.createElement('div'); div.className = 'history-item'; div.innerHTML = '<div><strong>' + c.name + ' 様</strong></div><div>📞 ' + c.phone + '</div>'; div.onclick = function() { document.getElementById('custName').value = c.name; document.getElementById('custPhone').value = c.phone; closeCustomerModal(); }; cList.appendChild(div); }); document.getElementById('customerModal').style.display = 'flex'; }
     function closeCustomerModal() { document.getElementById('customerModal').style.display = 'none'; }
     
-    // 新機能：顧客ごとの利用履歴を表示する機能
     function showCustomerHistory() {
         var phone = document.getElementById('custPhone').value.trim();
         if (!phone) {
@@ -622,7 +665,6 @@
         var container = document.getElementById('customerHistoryContainer');
         container.innerHTML = '';
 
-        // 電話番号で履歴を絞り込み
         var userHistory = salesHistory.filter(function(order) {
             return order.phone === phone && order.status !== "取消";
         });
@@ -630,7 +672,6 @@
         if (userHistory.length === 0) {
             container.innerHTML = '<div style="padding:15px; text-align:center; color:#999;">過去の利用履歴はありません</div>';
         } else {
-            // 新しい日付順になるように配列を反転させて表示
             userHistory.reverse().forEach(function(order) {
                 var div = document.createElement('div');
                 div.className = 'history-item';

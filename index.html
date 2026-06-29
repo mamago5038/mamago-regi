@@ -516,7 +516,7 @@
             if (idx > -1) { salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = itemsSummary.join(' / '); }
         } else {
             currentOrderId = 'ORD-' + Date.now();
-            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
+            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, region: custRegion, note: custNote, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
         }
 
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
@@ -652,6 +652,7 @@
         todayOrders.forEach(function(order) {
             html += `<div class="page-break">`;
             html += `<div class="r-factory-name">👤 ${order.customerName} 様</div>`;
+            if (order.region) { html += `<div style="font-size:20px; font-weight:bold; text-align:center; margin-bottom:4px;">📍 ${order.region}</div>`; }
             var itemsArr = order.items.split(' / ');
             totalDayItems += itemsArr.length;
 

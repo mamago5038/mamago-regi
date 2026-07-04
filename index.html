@@ -225,7 +225,7 @@
     <div class="bottom-action-grid"><button class="btn-nav" onclick="openTodayOrdersModal()">📋 本日の受付一覧（修正・取消）</button><button class="btn-nav green" onclick="openReportModal()">📊 日次集計レポート（締める）</button></div>
 </div>
 
-<div id="quantityModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="modalItemName">商品名</div><div class="modal-section-title">① 枚数を選択</div><div class="count-btn-grid" id="normalCountGrid"><button class="count-btn selected" id="qbtn-1" onclick="setModalQty(1)">1</button><button class="count-btn" id="qbtn-2" onclick="setModalQty(2)">2</button><button class="count-btn" id="qbtn-3" onclick="setModalQty(3)">3</button><button class="count-btn" id="qbtn-4" onclick="setModalQty(4)">4</button><button class="count-btn many" id="qbtn-5" onclick="showManualInput()">5枚〜</button></div><div style="display:none; text-align: center; margin-bottom:10px;" id="manualInputArea"><input type="number" id="manualCountField" min="5" value="5" style="width:80px; padding:8px; font-size:1.2rem; text-align:center;"> 枚 <button class="inline-btn" style="padding:8px 15px;" onclick="setModalQty('manual')">OK</button></div><div id="ysColorSection"><div class="modal-section-title">白 / 色付きの選択</div><div class="ys-color-grid"><div id="ys-white" class="opt-btn selected" onclick="setYsColor('白')">⚪️ 白</div><div id="ys-color" class="opt-btn" onclick="setYsColor('色付き')">🔵 色付き</div></div></div><div id="finishingOptionsSection"><div class="modal-section-title">② ご要望（複数選択可）</div><div class="option-tag-grid"><div id="opt-hanger" class="opt-btn" onclick="toggleOption('ハンガー')">ハンガー</div><div id="opt-tatami" class="opt-btn" onclick="toggleOption('たたみ')">たたみ</div><div id="opt-shimi" class="opt-btn" onclick="toggleOption('シミ抜き')">シミ抜き</div></div></div><div id="waterproofSection" class="waterproof-btn-wrap"><div class="modal-section-title">✨ プラスオプション</div><div id="opt-waterproof" class="btn-waterproof" onclick="toggleOption('防水加工')">💧 防水加工 (+¥550)</div></div><div class="modal-section-title">③ 手入力の備考 ＆ オプション追加料金</div><div style="display: flex; gap: 8px; align-items: center;"><input type="text" id="modalCustomMemo" class="modal-text-input" style="flex: 1;" placeholder="例：撥水加工、ほつれ等"><div class="extra-fee-wrap"><span style="font-size: 0.85rem; font-weight: bold; color: #2d5a27;">+¥</span><input type="number" id="modalExtraFee" placeholder="0"></div></div><button class="btn btn-primary" style="width:100%; margin-top:20px; padding:15px;" onclick="confirmModalSelection()">カートに追加する</button><div class="cancel-link" onclick="closeModal()">キャンセル</div></div></div>
+<div id="quantityModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="modalItemName">商品名</div><div class="modal-section-title" id="qtyLabelSection">① 枚数を選択</div><div class="count-btn-grid" id="normalCountGrid"><button class="count-btn selected" id="qbtn-1" onclick="setModalQty(1)">1</button><button class="count-btn" id="qbtn-2" onclick="setModalQty(2)">2</button><button class="count-btn" id="qbtn-3" onclick="setModalQty(3)">3</button><button class="count-btn" id="qbtn-4" onclick="setModalQty(4)">4</button><button class="count-btn many" id="qbtn-5" onclick="showManualInput()">5枚〜</button></div><div style="display:none; text-align: center; margin-bottom:10px;" id="manualInputArea"><input type="number" id="manualCountField" min="5" value="5" style="width:80px; padding:8px; font-size:1.2rem; text-align:center;"> 枚 <button class="inline-btn" style="padding:8px 15px;" onclick="setModalQty('manual')">OK</button></div><div id="ysColorSection"><div class="modal-section-title">白 / 色付きの選択</div><div class="ys-color-grid"><div id="ys-white" class="opt-btn selected" onclick="setYsColor('白')">⚪️ 白</div><div id="ys-color" class="opt-btn" onclick="setYsColor('色付き')">🔵 色付き</div></div></div><div id="finishingOptionsSection"><div class="modal-section-title">② ご要望（複数選択可）</div><div class="option-tag-grid"><div id="opt-hanger" class="opt-btn" onclick="toggleOption('ハンガー')">ハンガー</div><div id="opt-tatami" class="opt-btn" onclick="toggleOption('たたみ')">たたみ</div><div id="opt-shimi" class="opt-btn" onclick="toggleOption('シミ抜き')">シミ抜き</div></div></div><div id="waterproofSection" class="waterproof-btn-wrap"><div class="modal-section-title">✨ プラスオプション</div><div id="opt-waterproof" class="btn-waterproof" onclick="toggleOption('防水加工')">💧 防水加工 (+¥550)</div></div><div id="tatamiSection" style="display:none;"><div class="modal-section-title">畳数を選択（1畳あたり¥<span id="tatamiUnitPrice">0</span>）</div><div class="count-btn-grid"><button class="count-btn tatami-btn" data-val="1" onclick="setTatamiCount(1)">1畳</button><button class="count-btn tatami-btn" data-val="2" onclick="setTatamiCount(2)">2畳</button><button class="count-btn tatami-btn" data-val="3" onclick="setTatamiCount(3)">3畳</button><button class="count-btn tatami-btn" data-val="4.5" onclick="setTatamiCount(4.5)">4.5畳</button><button class="count-btn tatami-btn" data-val="6" onclick="setTatamiCount(6)">6畳</button><button class="count-btn tatami-btn" data-val="8" onclick="setTatamiCount(8)">8畳</button></div><div style="text-align:center; margin-top:8px;">その他：<input type="number" id="tatamiManualField" min="0.5" step="0.5" style="width:70px; padding:8px; text-align:center;" placeholder="畳数"> 畳 <button class="inline-btn" style="padding:8px 15px;" onclick="setTatamiManual()">OK</button></div><div style="text-align:center; margin-top:8px; font-weight:bold; color:#2d5a27;">小計：¥<span id="tatamiSubtotal">0</span></div></div><div class="modal-section-title">③ 手入力の備考 ＆ オプション追加料金</div><div style="display: flex; gap: 8px; align-items: center;"><input type="text" id="modalCustomMemo" class="modal-text-input" style="flex: 1;" placeholder="例：撥水加工、ほつれ等"><div class="extra-fee-wrap"><span style="font-size: 0.85rem; font-weight: bold; color: #2d5a27;">+¥</span><input type="number" id="modalExtraFee" placeholder="0"></div></div><button class="btn btn-primary" style="width:100%; margin-top:20px; padding:15px;" onclick="confirmModalSelection()">カートに追加する</button><div class="cancel-link" onclick="closeModal()">キャンセル</div></div></div>
 <div id="todayOrdersModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">📋 本日の受付一覧</div><div style="margin-bottom: 10px;"><input type="text" id="orderSearchKey" placeholder="🔍 名前で検索..." oninput="renderTodayOrders()" class="modal-text-input"></div><div class="history-list-box" id="todayOrdersContainer"></div><div class="cancel-link" onclick="closeTodayOrdersModal()">閉じる</div></div></div>
 <div id="checkoutModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="checkoutModalTitle">💰 受付・お会計確定</div><div class="checkout-total-box"><div id="checkoutQty" style="font-weight:bold; color:#2d5a27;">お預かり: 0点</div><div style="font-size:0.9rem; color:#555; font-weight:bold; margin-top:5px;">合計請求金額 (税込)</div><div class="checkout-total-amount">¥<span id="checkoutTotalPrice">0</span></div></div><div class="payment-toggle"><div id="pay-now" class="pay-btn selected" onclick="setPaymentType('now')">👇 今すぐお支払い<br><small>(前金)</small></div><div id="pay-later" class="pay-btn" onclick="setPaymentType('later')">📦 仕上がり時払い<br><small>(後金・貸し)</small></div></div><button id="checkoutConfirmBtn" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.15rem;" onclick="submitOrder()">✅ 受付を確定する</button><div class="cancel-link" onclick="closeCheckoutModal()">やり直す（戻る）</div></div></div>
 <div id="customModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">✍️ 特殊品・手入力</div><label style="font-size:0.85rem; font-weight:bold;">商品名:</label><input type="text" id="customItemName" class="modal-text-input" style="margin-bottom:12px;" placeholder="例: 特大ジュータン"><label style="font-size:0.85rem; font-weight:bold;">金額 (税込):</label><input type="number" id="customItemPrice" class="modal-text-input" style="margin-bottom:15px;"><button class="btn btn-primary" style="width:100%; padding:14px;" onclick="addCustomItem()">選択画面へ進む</button><div class="cancel-link" onclick="closeCustomModal()">キャンセル</div></div></div>
@@ -385,6 +385,7 @@
     var modalSelectedQty = 1;
     var modalSelectedYsColor = '白';
     var modalSelectedOptions = [];
+    var modalTatamiCount = 1;
 
     window.onload = function() {
         updateClock();
@@ -445,17 +446,25 @@
     function openQuantityModal(name, price, categoryKey) {
         activeItem = { name: name, price: price, categoryKey: categoryKey };
         document.getElementById('modalItemName').innerText = name + " (¥" + price + ")";
-        modalSelectedQty = 1; modalSelectedYsColor = '白'; modalSelectedOptions = [];
-        document.getElementById('modalCustomMemo').value = ''; document.getElementById('modalExtraFee').value = '';
+        modalSelectedQty = 1; modalSelectedYsColor = '白'; modalSelectedOptions = []; modalTatamiCount = 1;
+        document.getElementById('modalCustomMemo').value = ''; document.getElementById('modalExtraFee').value = ''; document.getElementById('tatamiManualField').value = '';
         document.getElementById('manualInputArea').style.display = 'none'; document.getElementById('normalCountGrid').style.display = 'grid';
         if (name.indexOf('ワイシャツ') > -1) { document.getElementById('ysColorSection').style.display = 'block'; } else { document.getElementById('ysColorSection').style.display = 'none'; }
-        if (['bedding', 'covers', 'matsuri', 'hats'].indexOf(categoryKey) > -1) { document.getElementById('finishingOptionsSection').style.display = 'none'; } else { document.getElementById('finishingOptionsSection').style.display = 'block'; }
+        if (['bedding', 'covers', 'matsuri', 'hats', 'carpet'].indexOf(categoryKey) > -1) { document.getElementById('finishingOptionsSection').style.display = 'none'; } else { document.getElementById('finishingOptionsSection').style.display = 'block'; }
         if (['outers'].indexOf(categoryKey) > -1) { document.getElementById('waterproofSection').style.display = 'block'; } else { document.getElementById('waterproofSection').style.display = 'none'; }
+        if (categoryKey === 'carpet') {
+            document.getElementById('qtyLabelSection').style.display = 'none'; document.getElementById('normalCountGrid').style.display = 'none'; document.getElementById('manualInputArea').style.display = 'none';
+            document.getElementById('tatamiSection').style.display = 'block'; document.getElementById('tatamiUnitPrice').innerText = price.toLocaleString();
+        } else {
+            document.getElementById('qtyLabelSection').style.display = 'block'; document.getElementById('tatamiSection').style.display = 'none';
+        }
         updateModalUi(); document.getElementById('quantityModal').style.display = 'flex';
     }
     function setModalQty(qty) { if(qty === 'manual') { var val = parseInt(document.getElementById('manualCountField').value); if(val >= 5) modalSelectedQty = val; } else { modalSelectedQty = qty; } updateModalUi(); }
     function showManualInput() { document.getElementById('normalCountGrid').style.display = 'none'; document.getElementById('manualInputArea').style.display = 'block'; }
     function setYsColor(color) { modalSelectedYsColor = color; updateModalUi(); }
+    function setTatamiCount(n) { modalTatamiCount = n; document.getElementById('tatamiManualField').value = ''; updateModalUi(); }
+    function setTatamiManual() { var v = parseFloat(document.getElementById('tatamiManualField').value); if (v > 0) modalTatamiCount = v; updateModalUi(); }
     function toggleOption(opt) { var idx = modalSelectedOptions.indexOf(opt); if(idx > -1) modalSelectedOptions.splice(idx, 1); else modalSelectedOptions.push(opt); updateModalUi(); }
 
     function updateModalUi() {
@@ -468,6 +477,8 @@
         if(modalSelectedOptions.indexOf('たたみ') > -1) document.getElementById('opt-tatami').classList.add('selected');
         if(modalSelectedOptions.indexOf('シミ抜き') > -1) document.getElementById('opt-shimi').classList.add('selected');
         document.getElementById('opt-waterproof').classList.remove('selected'); if(modalSelectedOptions.indexOf('防水加工') > -1) document.getElementById('opt-waterproof').classList.add('selected');
+        document.querySelectorAll('.tatami-btn').forEach(function(b) { b.classList.remove('selected'); if(parseFloat(b.dataset.val) === modalTatamiCount) b.classList.add('selected'); });
+        if (activeItem) { document.getElementById('tatamiSubtotal').innerText = Math.round(activeItem.price * modalTatamiCount).toLocaleString(); }
     }
 
     function confirmModalSelection() {
@@ -477,8 +488,16 @@
         var memoParts = modalSelectedOptions.filter(function(o) { return o !== '防水加工'; });
         var customMemo = document.getElementById('modalCustomMemo').value.trim(); if(customMemo) memoParts.push(customMemo);
         var extraFee = parseInt(document.getElementById('modalExtraFee').value) || 0; if(extraFee > 0) { finalPrice += extraFee; memoParts.push("追加料金+" + extraFee + "円"); }
+        if (activeItem.categoryKey === 'carpet') {
+            finalPrice = Math.round(finalPrice * modalTatamiCount);
+            memoParts.unshift(modalTatamiCount + '畳');
+        }
         var finalMemo = memoParts.join('・');
-        for(var i=0; i<modalSelectedQty; i++) { cart.push({ name: finalName, price: finalPrice, memo: finalMemo }); }
+        if (activeItem.categoryKey === 'carpet') {
+            cart.push({ name: finalName, price: finalPrice, memo: finalMemo });
+        } else {
+            for(var i=0; i<modalSelectedQty; i++) { cart.push({ name: finalName, price: finalPrice, memo: finalMemo }); }
+        }
         closeModal(); updateDisplay();
     }
     function closeModal() { document.getElementById('quantityModal').style.display = 'none'; activeItem = null; }

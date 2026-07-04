@@ -221,7 +221,7 @@
             <div class="large-category-grid" id="largeCategoryContainer"></div>
             <button class="custom-input-btn" onclick="openCustomModal()">✍️ 特殊品・金額を手入力する</button>
         </div>
-        <div id="itemsView"><div class="sub-header"><button class="back-btn" onclick="backToCategories()">🔙 もどる</button><h3 class="sub-title" id="currentCategoryTitle">カテゴリ名</h3></div><div class="item-grid" id="itemGridContainer"></div></div>
+        <div id="itemsView"><div class="sub-header"><button class="back-btn" onclick="backToCategories()">🔙 もどる</button><h3 class="sub-title" id="currentCategoryTitle">カテゴリ名</h3></div><div class="item-grid" id="itemGridContainer"></div><div class="paging-nav" id="itemPagingNav" style="margin-top:12px;"><button class="nav-btn" onclick="changeItemPage(-1)">← 前へ</button><div id="itemPageIndicator" class="page-indicator">1 / 1</div><button class="nav-btn" onclick="changeItemPage(1)">次へ →</button></div></div>
     </div>
 
     <div class="section-block"><h3>📋 お預かり明細</h3><ul id="receiptList" class="receipt-list"><li style="color: #999; justify-content: center; border: none;" id="emptyMessage">商品が選択されていません</li></ul><div class="total-box"><div class="total-label">合計金額 (税込)</div><div class="total-amount">¥<span id="totalPrice">0</span></div></div></div>
@@ -381,6 +381,9 @@
         ['white', 'matsuri', 'hats', 'carpet', 'alterations']
     ];
     var currentCatPage = 0;
+    var ITEMS_PER_PAGE = 10;
+    var currentItemCategory = null;
+    var currentItemPage = 0;
 
     var cart = [];
     var currentPaymentType = 'now';
@@ -447,7 +450,31 @@
         });
     }
 
-    function openCategory(key) { document.getElementById('categoryView').style.display = 'none'; document.getElementById('itemsView').style.display = 'block'; document.getElementById('currentCategoryTitle').innerText = masterCatalog[key].title; var itemGrid = document.getElementById('itemGridContainer'); itemGrid.innerHTML = ''; masterCatalog[key].items.forEach(function(item) { var card = document.createElement('div'); card.className = 'item-card'; card.onclick = function() { openQuantityModal(item.name, item.price, key); }; card.innerHTML = '<span class="item-name">' + item.name + '</span><span class="item-price">¥' + item.price.toLocaleString() + '</span>'; itemGrid.appendChild(card); }); }
+    function openCategory(key) {
+        document.getElementById('categoryView').style.display = 'none'; document.getElementById('itemsView').style.display = 'block';
+        document.getElementById('currentCategoryTitle').innerText = masterCatalog[key].title;
+        currentItemCategory = key; currentItemPage = 0;
+        renderItemPage();
+    }
+    function renderItemPage() {
+        var items = masterCatalog[currentItemCategory].items;
+        var totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+        if (currentItemPage >= totalPages) currentItemPage = totalPages - 1;
+        var start = currentItemPage * ITEMS_PER_PAGE;
+        var pageItems = items.slice(start, start + ITEMS_PER_PAGE);
+        var itemGrid = document.getElementById('itemGridContainer'); itemGrid.innerHTML = '';
+        pageItems.forEach(function(item) { var card = document.createElement('div'); card.className = 'item-card'; card.onclick = function() { openQuantityModal(item.name, item.price, currentItemCategory); }; card.innerHTML = '<span class="item-name">' + item.name + '</span><span class="item-price">¥' + item.price.toLocaleString() + '</span>'; itemGrid.appendChild(card); });
+        document.getElementById('itemPageIndicator').innerText = (currentItemPage + 1) + " / " + totalPages;
+        document.getElementById('itemPagingNav').style.display = totalPages > 1 ? 'flex' : 'none';
+    }
+    function changeItemPage(dir) {
+        var items = masterCatalog[currentItemCategory].items;
+        var totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+        currentItemPage += dir;
+        if (currentItemPage < 0) currentItemPage = 0;
+        if (currentItemPage >= totalPages) currentItemPage = totalPages - 1;
+        renderItemPage();
+    }
     function backToCategories() { document.getElementById('itemsView').style.display = 'none'; document.getElementById('categoryView').style.display = 'block'; }
 
     function openQuantityModal(name, price, categoryKey) {

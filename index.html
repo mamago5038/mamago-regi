@@ -375,6 +375,37 @@
 
     window.addEventListener('online', function() { retryPendingQueue(true); });
 
+    // 🏷️ タグ番号カウンター復旧（ホーム画面アイコン再作成等で端末のデータが消えても重複を防ぐ）
+    function parseLastTagPos(tagStr) {
+        if (!tagStr) return null;
+        var parts = tagStr.split(' 〜 ');
+        var firstMatch = parts[0].match(/(\d+)-(\d+)/);
+        if (!firstMatch) return null;
+        if (parts.length === 1) { return { p: parseInt(firstMatch[1], 10), c: parseInt(firstMatch[2], 10) }; }
+        var last = parts[parts.length - 1].trim();
+        var lastMatch = last.match(/(\d+)-(\d+)/);
+        if (lastMatch) { return { p: parseInt(lastMatch[1], 10), c: parseInt(lastMatch[2], 10) }; }
+        var cOnly = last.match(/(\d+)/);
+        if (cOnly) { return { p: parseInt(firstMatch[1], 10), c: parseInt(cOnly[1], 10) }; }
+        return null;
+    }
+    function syncTagCounterWithServer() {
+        if (!(GAS_URL && GAS_URL.indexOf("http") === 0)) return;
+        fetch(GAS_URL + '?action=getLastTag').then(function(res) { return res.json(); }).then(function(data) {
+            var pos = parseLastTagPos(data.lastTag);
+            if (!pos) return;
+            var nextP = pos.p, nextC = pos.c + 1;
+            if (nextC > 200) { nextC = 1; nextP++; }
+            var serverVal = nextP * 1000 + nextC;
+            var localVal = globalTagParent * 1000 + globalTagChild;
+            if (serverVal > localVal) {
+                globalTagParent = nextP; globalTagChild = nextC;
+                localStorage.setItem('tagParent', globalTagParent); localStorage.setItem('tagChild', globalTagChild);
+                updateDisplay();
+            }
+        }).catch(function(e) {});
+    }
+
     // 240アイテムに拡張されたマスターカタログ
     var masterCatalog = {
         "sales": { title: "🎁 セール品", items: [{name: "【セール】ダウンジャケット", price: 1500}, {name: "【セール】コート", price: 800}, {name: "【セール】セーター", price: 300}, {name: "【セール】毛布S", price: 500}] },
@@ -468,7 +499,7 @@
         document.getElementById('deliveryDateInput').value = dy + "-" + dm + "-" + dd;
 
         buildDrillDownMenu(); updateDisplay(); updateSoundToggleUI();
-        updatePendingBadge(); retryPendingQueue(true);
+        updatePendingBadge(); retryPendingQueue(true); syncTagCounterWithServer();
     };
 
     function updateClock() { var now = new Date(); var days = ['日', '月', '火', '水', '木', '金', '土']; var y = now.getFullYear(); var m = String(now.getMonth() + 1).padStart(2, '0'); var d = String(now.getDate()).padStart(2, '0'); var dw = days[now.getDay()]; var h = String(now.getHours()).padStart(2, '0'); var min = String(now.getMinutes()).padStart(2, '0'); document.getElementById('clockDisplay').innerText = y + "/" + m + "/" + d + " (" + dw + ") " + h + ":" + min; }

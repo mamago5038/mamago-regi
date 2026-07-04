@@ -173,6 +173,7 @@
     <div class="header-wrap">
         <h2>☁️ ママ号クラウドレジ Vol.31</h2>
         <button id="soundToggleBtn" class="sound-toggle-btn" onclick="toggleSound()">🔊 音ON</button>
+        <button id="pendingSyncBtn" onclick="retryPendingQueue()" style="display:none; background:#c0392b; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:0.8rem; cursor:pointer;">🔄 未送信 0件</button>
     </div>
     <div class="status-customer-panel">
         <div class="panel-top">
@@ -323,6 +324,56 @@
     var url_part3 = "/exec";
     var GAS_URL = url_part1 + url_part2 + url_part3;
 
+    // 📡 通信失敗時の再送キュー（電波の悪い訪問先でもデータを失わないようにする）
+    var GAS_PENDING_KEY = 'cleaning_pending_queue';
+
+    function sendToGAS(payload) {
+        if (!(GAS_URL && GAS_URL.indexOf("http") === 0)) return;
+        fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+            .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); })
+            .catch(function(e) { queuePendingSend(payload); });
+    }
+
+    function queuePendingSend(payload) {
+        var queue = JSON.parse(localStorage.getItem(GAS_PENDING_KEY) || '[]');
+        queue.push({ savedAt: new Date().toLocaleString('ja-JP'), payload: payload });
+        localStorage.setItem(GAS_PENDING_KEY, JSON.stringify(queue));
+        updatePendingBadge();
+    }
+
+    function retryPendingQueue(silent) {
+        var queue = JSON.parse(localStorage.getItem(GAS_PENDING_KEY) || '[]');
+        if (queue.length === 0) { updatePendingBadge(); return; }
+        if (!(GAS_URL && GAS_URL.indexOf("http") === 0)) return;
+        var remaining = []; var pending = queue.length;
+        queue.forEach(function(entry) {
+            fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(entry.payload) })
+                .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); })
+                .catch(function(e) { remaining.push(entry); })
+                .then(function() {
+                    pending--;
+                    if (pending === 0) {
+                        localStorage.setItem(GAS_PENDING_KEY, JSON.stringify(remaining));
+                        updatePendingBadge();
+                        if (!silent) {
+                            if (remaining.length === 0) alert("未送信データを全て送信しました！");
+                            else alert(remaining.length + "件はまだ送信できませんでした。電波の良い場所で再度お試しください。");
+                        }
+                    }
+                });
+        });
+    }
+
+    function updatePendingBadge() {
+        var queue = JSON.parse(localStorage.getItem(GAS_PENDING_KEY) || '[]');
+        var btn = document.getElementById('pendingSyncBtn');
+        if (!btn) return;
+        if (queue.length > 0) { btn.style.display = 'inline-flex'; btn.innerText = '🔄 未送信 ' + queue.length + '件'; }
+        else { btn.style.display = 'none'; }
+    }
+
+    window.addEventListener('online', function() { retryPendingQueue(true); });
+
     // 240アイテムに拡張されたマスターカタログ
     var masterCatalog = {
         "sales": { title: "🎁 セール品", items: [{name: "【セール】ダウンジャケット", price: 1500}, {name: "【セール】コート", price: 800}, {name: "【セール】セーター", price: 300}, {name: "【セール】毛布S", price: 500}] },
@@ -416,6 +467,7 @@
         document.getElementById('deliveryDateInput').value = dy + "-" + dm + "-" + dd;
 
         buildDrillDownMenu(); updateDisplay(); updateSoundToggleUI();
+        updatePendingBadge(); retryPendingQueue(true);
     };
 
     function updateClock() { var now = new Date(); var days = ['日', '月', '火', '水', '木', '金', '土']; var y = now.getFullYear(); var m = String(now.getMonth() + 1).padStart(2, '0'); var d = String(now.getDate()).padStart(2, '0'); var dw = days[now.getDay()]; var h = String(now.getHours()).padStart(2, '0'); var min = String(now.getMinutes()).padStart(2, '0'); document.getElementById('clockDisplay').innerText = y + "/" + m + "/" + d + " (" + dw + ") " + h + ":" + min; }
@@ -549,7 +601,7 @@
         log.push(entry);
         localStorage.setItem('cleaning_audit_log', JSON.stringify(log));
         var payload = Object.assign({ reportType: 'AUDIT_LOG' }, entry);
-        if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
+        sendToGAS(payload);
     }
 
     function removeCart(idx) {
@@ -631,7 +683,7 @@
 
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
         var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
-        if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
+        sendToGAS(payload);
 
         currentOrderData = {
             orderId: currentOrderId,
@@ -828,7 +880,7 @@
                 phone: original.phone, tagNumber: original.tagNumber, totalQty: original.totalQty, gpsLink: original.gpsLink,
                 totalSales: 0, paymentType: "【取消】", items: original.items, status: "取消"
             };
-            if (GAS_URL && GAS_URL.indexOf("http") === 0) fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(cancelPayload) }).catch(function(e) {});
+            sendToGAS(cancelPayload);
             logAuditEvent('注文取消', id, original.customerName, '¥' + original.totalSales.toLocaleString() + '｜' + original.items, '取消', '');
             alert("取り消しました。"); renderTodayOrders();
         }
@@ -1045,7 +1097,7 @@
 
         var reportPayload = { reportType: "DAILY_CLOSE", date: targetDate, staffName: staff, totalSales: parseInt(sales) || 0, totalQty: parseInt(qty) || 0, customerCount: parseInt(count) || 0, creditAmount: parseInt(credit) || 0, tagRange: tagRange, dailyMemo: memo };
         if (GAS_URL && GAS_URL.indexOf("http") === 0) {
-            fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(reportPayload) }).catch(function(e) {});
+            sendToGAS(reportPayload);
             alert("本日（" + targetDate + "）の集計データを送信しました！"); closeReportModal();
         } else { alert("※URLが設定されていません"); closeReportModal(); }
     }

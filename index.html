@@ -227,11 +227,12 @@
 
     <div class="section-block"><h3>📋 お預かり明細</h3><ul id="receiptList" class="receipt-list"><li style="color: #999; justify-content: center; border: none;" id="emptyMessage">商品が選択されていません</li></ul><div class="total-box"><div class="total-label">合計金額 (税込)</div><div class="total-amount">¥<span id="totalPrice">0</span></div></div></div>
     <div class="btn-container"><button class="btn btn-secondary" onclick="resetForm()">クリア</button><button id="checkoutBtnMain" class="btn btn-primary" onclick="openCheckoutModal()">お会計へ進む</button></div>
-    <div class="bottom-action-grid"><button class="btn-nav" onclick="openTodayOrdersModal()">📋 本日の受付一覧（修正・取消）</button><button class="btn-nav green" onclick="openReportModal()">📊 日次集計レポート（締める）</button></div>
+    <div class="bottom-action-grid"><button class="btn-nav" onclick="openTodayOrdersModal()">📋 本日の受付一覧（修正・取消）</button><button class="btn-nav green" onclick="openReportModal()">📊 日次集計レポート（締める）</button><button class="btn-nav" style="grid-column: 1 / -1; background:#c0392b;" onclick="openUnpaidListModal()">💰 未収金一覧（集金）</button></div>
 </div>
 
 <div id="quantityModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="modalItemName">商品名</div><div class="modal-section-title" id="qtyLabelSection">① 枚数を選択</div><div class="count-btn-grid" id="normalCountGrid"><button class="count-btn selected" id="qbtn-1" onclick="setModalQty(1)">1</button><button class="count-btn" id="qbtn-2" onclick="setModalQty(2)">2</button><button class="count-btn" id="qbtn-3" onclick="setModalQty(3)">3</button><button class="count-btn" id="qbtn-4" onclick="setModalQty(4)">4</button><button class="count-btn many" id="qbtn-5" onclick="showManualInput()">5枚〜</button></div><div style="display:none; text-align: center; margin-bottom:10px;" id="manualInputArea"><input type="number" id="manualCountField" min="5" value="5" style="width:80px; padding:8px; font-size:1.2rem; text-align:center;"> 枚 <button class="inline-btn" style="padding:8px 15px;" onclick="setModalQty('manual')">OK</button></div><div id="ysColorSection"><div class="modal-section-title">白 / 色付きの選択</div><div class="ys-color-grid"><div id="ys-white" class="opt-btn selected" onclick="setYsColor('白')">⚪️ 白</div><div id="ys-color" class="opt-btn" onclick="setYsColor('色付き')">🔵 色付き</div></div></div><div id="finishingOptionsSection"><div class="modal-section-title">② ご要望（複数選択可）</div><div class="option-tag-grid"><div id="opt-hanger" class="opt-btn" onclick="toggleOption('ハンガー')">ハンガー</div><div id="opt-tatami" class="opt-btn" onclick="toggleOption('たたみ')">たたみ</div><div id="opt-shimi" class="opt-btn" onclick="toggleOption('シミ抜き')">シミ抜き</div></div></div><div id="waterproofSection" class="waterproof-btn-wrap"><div class="modal-section-title">✨ プラスオプション</div><div id="opt-waterproof" class="btn-waterproof" onclick="toggleOption('防水加工')">💧 防水加工 (+¥550)</div></div><div id="tatamiSection" style="display:none;"><div class="modal-section-title">畳数を選択（1畳あたり¥<span id="tatamiUnitPrice">0</span>）</div><div class="count-btn-grid"><button class="count-btn tatami-btn" data-val="1" onclick="setTatamiCount(1)">1畳</button><button class="count-btn tatami-btn" data-val="2" onclick="setTatamiCount(2)">2畳</button><button class="count-btn tatami-btn" data-val="3" onclick="setTatamiCount(3)">3畳</button><button class="count-btn tatami-btn" data-val="4.5" onclick="setTatamiCount(4.5)">4.5畳</button><button class="count-btn tatami-btn" data-val="6" onclick="setTatamiCount(6)">6畳</button><button class="count-btn tatami-btn" data-val="8" onclick="setTatamiCount(8)">8畳</button></div><div style="text-align:center; margin-top:8px;">その他：<input type="number" id="tatamiManualField" min="0.5" step="0.5" style="width:70px; padding:8px; text-align:center;" placeholder="畳数"> 畳 <button class="inline-btn" style="padding:8px 15px;" onclick="setTatamiManual()">OK</button></div><div style="text-align:center; margin-top:8px; font-weight:bold; color:#2d5a27;">小計：¥<span id="tatamiSubtotal">0</span></div></div><div class="modal-section-title">③ 手入力の備考 ＆ オプション追加料金</div><div style="display: flex; gap: 8px; align-items: center;"><input type="text" id="modalCustomMemo" class="modal-text-input" style="flex: 1;" placeholder="例：撥水加工、ほつれ等"><div class="extra-fee-wrap"><span style="font-size: 0.85rem; font-weight: bold; color: #2d5a27;">+¥</span><input type="number" id="modalExtraFee" placeholder="0"></div></div><button class="btn btn-primary" style="width:100%; margin-top:20px; padding:15px;" onclick="confirmModalSelection()">カートに追加する</button><div class="cancel-link" onclick="closeModal()">キャンセル</div></div></div>
-<div id="todayOrdersModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">📋 本日の受付一覧</div><div style="margin-bottom: 10px;"><input type="text" id="orderSearchKey" placeholder="🔍 名前で検索..." oninput="renderTodayOrders()" class="modal-text-input"></div><div class="history-list-box" id="todayOrdersContainer"></div><div class="cancel-link" onclick="closeTodayOrdersModal()">閉じる</div></div></div>
+<div id="todayOrdersModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">📋 本日の受付一覧</div><div style="margin-bottom: 10px;"><input type="text" id="orderSearchKey" placeholder="🔍 名前で検索..." oninput="renderTodayOrders()" class="modal-text-input"></div><div style="display:flex; gap:8px; margin-bottom:10px;"><button id="sortByTimeBtn" class="mini-btn mini-btn-success" style="flex:1;" onclick="setTodayOrdersSort('time')">🕐 時刻順</button><button id="sortByRegionBtn" class="mini-btn" style="flex:1; background:#eee; color:#444;" onclick="setTodayOrdersSort('region')">📍 地域順</button></div><div class="history-list-box" id="todayOrdersContainer"></div><div class="cancel-link" onclick="closeTodayOrdersModal()">閉じる</div></div></div>
+<div id="unpaidListModal" class="modal-overlay"><div class="modal-content" style="max-width: 420px;"><div class="modal-title">💰 未収金一覧（集金）</div><div class="history-list-box" id="unpaidListContainer"></div><div class="cancel-link" onclick="closeUnpaidListModal()">閉じる</div></div></div>
 <div id="checkoutModal" class="modal-overlay"><div class="modal-content"><div class="modal-title" id="checkoutModalTitle">💰 受付・お会計確定</div><div class="checkout-total-box"><div id="checkoutQty" style="font-weight:bold; color:#2d5a27;">お預かり: 0点</div><div style="font-size:0.9rem; color:#555; font-weight:bold; margin-top:5px;">合計請求金額 (税込)</div><div class="checkout-total-amount">¥<span id="checkoutTotalPrice">0</span></div></div><div class="payment-toggle"><div id="pay-now" class="pay-btn selected" onclick="setPaymentType('now')">👇 今すぐお支払い<br><small>(前金)</small></div><div id="pay-later" class="pay-btn" onclick="setPaymentType('later')">📦 仕上がり時払い<br><small>(後金・貸し)</small></div></div><button id="checkoutConfirmBtn" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.15rem;" onclick="submitOrder()">✅ 受付を確定する</button><div class="cancel-link" onclick="closeCheckoutModal()">やり直す（戻る）</div></div></div>
 <div id="customModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">✍️ 特殊品・手入力</div><label style="font-size:0.85rem; font-weight:bold;">商品名:</label><input type="text" id="customItemName" class="modal-text-input" style="margin-bottom:12px;" placeholder="例: 特大ジュータン"><label style="font-size:0.85rem; font-weight:bold;">金額 (税込):</label><input type="number" id="customItemPrice" class="modal-text-input" style="margin-bottom:15px;"><button class="btn btn-primary" style="width:100%; padding:14px;" onclick="addCustomItem()">選択画面へ進む</button><div class="cancel-link" onclick="closeCustomModal()">キャンセル</div></div></div>
 <div id="customerModal" class="modal-overlay"><div class="modal-content"><div class="modal-title">📱 顧客名簿</div><div class="history-list-box" id="customerListContainer" style="max-height:250px;"></div><div class="cancel-link" onclick="closeCustomerModal()">閉じる</div></div></div>
@@ -678,7 +679,7 @@
             }
         } else {
             currentOrderId = 'ORD-' + Date.now();
-            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, region: custRegion, note: custNote, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
+            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, region: custRegion, note: custNote, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, creditSettled: false, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
         }
 
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
@@ -853,20 +854,72 @@
         window.print();
     }
 
+    var todayOrdersSortMode = 'time';
     function openTodayOrdersModal() { document.getElementById('orderSearchKey').value = ''; renderTodayOrders(); document.getElementById('todayOrdersModal').style.display = 'flex'; }
     function closeTodayOrdersModal() { document.getElementById('todayOrdersModal').style.display = 'none'; }
+    function setTodayOrdersSort(mode) {
+        todayOrdersSortMode = mode;
+        document.getElementById('sortByTimeBtn').className = mode === 'time' ? 'mini-btn mini-btn-success' : 'mini-btn';
+        document.getElementById('sortByTimeBtn').style.background = mode === 'time' ? '' : '#eee';
+        document.getElementById('sortByTimeBtn').style.color = mode === 'time' ? '' : '#444';
+        document.getElementById('sortByRegionBtn').className = mode === 'region' ? 'mini-btn mini-btn-success' : 'mini-btn';
+        document.getElementById('sortByRegionBtn').style.background = mode === 'region' ? '' : '#eee';
+        document.getElementById('sortByRegionBtn').style.color = mode === 'region' ? '' : '#444';
+        renderTodayOrders();
+    }
     function renderTodayOrders() {
         var container = document.getElementById('todayOrdersContainer'); container.innerHTML = ''; var searchKey = document.getElementById('orderSearchKey').value.trim().toLowerCase(); var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); var todayKey = document.getElementById('reportDatePicker').value; var todayOrders = [];
         for(var i = salesHistory.length - 1; i >= 0; i--) { if(salesHistory[i].date === todayKey) todayOrders.push(salesHistory[i]); }
         if (todayOrders.length === 0) { container.innerHTML = '<div style="padding:15px; text-align:center; color:#999;">本日の受付履歴はありません</div>'; return; }
+        if (todayOrdersSortMode === 'region') {
+            todayOrders.sort(function(a, b) { return (a.region || 'zzz').localeCompare(b.region || 'zzz', 'ja'); });
+        }
         todayOrders.forEach(function(order) {
             if (searchKey && order.customerName.toLowerCase().indexOf(searchKey) === -1) return;
-            var itemDiv = document.createElement('div'); itemDiv.className = 'history-item'; var badge = order.status === "取消" ? '<span class="badge-pay-type bg-cancel">取消</span>' : (order.cashReceived > 0 ? '<span class="badge-pay-type bg-now">前金</span>' : '<span class="badge-pay-type bg-later">貸し</span>'); var timeDisp = order.timeStr.split(' ')[1] || order.timeStr; var btnHtml = order.status !== "取消" ? '<div class="action-row"><button class="mini-btn mini-btn-success" onclick="modifyOrder(\'' + order.id + '\')">✏️ 修正する</button><button class="mini-btn mini-btn-danger" onclick="cancelOrder(\'' + order.id + '\')">🔴 取消する</button></div>' : '';
-            itemDiv.innerHTML = '<div class="history-summary-line" onclick="toggleOrderAccordion(\'' + order.id + '\')"><div>' + badge + ' <span>' + order.customerName + '様</span></div><div>¥' + order.totalSales.toLocaleString() + ' ▾</div></div><div class="history-detail-area" id="detail-' + order.id + '"><div><strong>タグ:</strong> ' + order.tagNumber + '</div><div><strong>明細:</strong> ' + order.items + '</div><div><strong>担当:</strong> ' + order.staffName + '</div>' + btnHtml + '</div>';
+            var itemDiv = document.createElement('div'); itemDiv.className = 'history-item'; var badge = order.status === "取消" ? '<span class="badge-pay-type bg-cancel">取消</span>' : (order.cashReceived > 0 ? '<span class="badge-pay-type bg-now">前金</span>' : '<span class="badge-pay-type bg-later">貸し</span>'); var timeDisp = order.timeStr.split(' ')[1] || order.timeStr; var regionDisp = order.region ? ('📍' + order.region + ' ') : ''; var btnHtml = order.status !== "取消" ? '<div class="action-row"><button class="mini-btn mini-btn-success" onclick="modifyOrder(\'' + order.id + '\')">✏️ 修正する</button><button class="mini-btn mini-btn-danger" onclick="cancelOrder(\'' + order.id + '\')">🔴 取消する</button></div>' : '';
+            itemDiv.innerHTML = '<div class="history-summary-line" onclick="toggleOrderAccordion(\'' + order.id + '\')"><div>' + badge + ' <span>' + regionDisp + order.customerName + '様</span></div><div>¥' + order.totalSales.toLocaleString() + ' ▾</div></div><div class="history-detail-area" id="detail-' + order.id + '"><div><strong>タグ:</strong> ' + order.tagNumber + '</div><div><strong>明細:</strong> ' + order.items + '</div><div><strong>担当:</strong> ' + order.staffName + '</div>' + btnHtml + '</div>';
             container.appendChild(itemDiv);
         });
     }
     function toggleOrderAccordion(id) { var el = document.getElementById("detail-" + id); if(el) el.classList.toggle('active'); }
+
+    function openUnpaidListModal() { renderUnpaidList(); document.getElementById('unpaidListModal').style.display = 'flex'; }
+    function closeUnpaidListModal() { document.getElementById('unpaidListModal').style.display = 'none'; }
+    function renderUnpaidList() {
+        var container = document.getElementById('unpaidListContainer'); container.innerHTML = '';
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var unpaid = salesHistory.filter(function(r) { return r.status !== "取消" && r.creditAmount > 0 && !r.creditSettled; });
+        unpaid.sort(function(a, b) { return (a.region || 'zzz').localeCompare(b.region || 'zzz', 'ja'); });
+        if (unpaid.length === 0) { container.innerHTML = '<div style="padding:15px; text-align:center; color:#999;">未収金はありません</div>'; return; }
+        var total = 0;
+        unpaid.forEach(function(order) {
+            total += order.creditAmount;
+            var regionDisp = order.region ? ('📍' + order.region + ' ') : '';
+            var itemDiv = document.createElement('div'); itemDiv.className = 'history-item'; itemDiv.style.textAlign = 'left';
+            itemDiv.innerHTML = '<div style="font-weight:bold;">' + regionDisp + order.customerName + '様 <span style="float:right; color:#c0392b;">¥' + order.creditAmount.toLocaleString() + '</span></div>'
+                + '<div style="font-size:0.85rem; color:#666;">📅 ' + order.date + ' ・ 📞 ' + (order.phone || '未登録') + ' ・ タグ ' + order.tagNumber + '</div>'
+                + '<div class="action-row"><button class="mini-btn mini-btn-success" onclick="markCreditSettled(\'' + order.id + '\')">✅ 回収済みにする</button></div>';
+            container.appendChild(itemDiv);
+        });
+        var totalDiv = document.createElement('div'); totalDiv.style.cssText = 'padding:10px; text-align:right; font-weight:bold; border-top:2px solid #333; margin-top:6px;';
+        totalDiv.innerText = '合計未収金: ¥' + total.toLocaleString();
+        container.appendChild(totalDiv);
+    }
+    function markCreditSettled(id) {
+        if (!confirm("回収済みにしますか？")) return;
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var idx = -1; for (var i = 0; i < salesHistory.length; i++) { if (salesHistory[i].id === id) idx = i; }
+        if (idx > -1) {
+            salesHistory[idx].creditSettled = true;
+            localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
+            var order = salesHistory[idx];
+            var settlePayload = { id: order.id, date: order.timeStr, staffName: order.staffName, customerName: order.customerName, phone: order.phone, tagNumber: order.tagNumber, totalQty: order.totalQty, gpsLink: order.gpsLink, totalSales: order.totalSales, paymentType: "後金(回収済み)", items: order.items, status: order.status };
+            sendToGAS(settlePayload);
+            logAuditEvent('未収金回収', id, order.customerName, '¥' + order.creditAmount.toLocaleString() + '（未収）', '回収済み', '');
+            renderUnpaidList();
+        }
+    }
+
     function cancelOrder(id) {
         if(!confirm("取り消しますか？")) return;
         var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');

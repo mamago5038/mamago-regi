@@ -702,6 +702,21 @@
         html += `<div class="r-large r-center">${tags}</div>`;
         html += `<div class="r-divider"></div>`;
 
+        var auditLog = JSON.parse(localStorage.getItem('cleaning_audit_log') || '[]');
+        var todaysAudit = auditLog.filter(function(e) { return e.date === targetDate; });
+        html += `<div>【削除・修正・取消一覧】(${todaysAudit.length}件)</div>`;
+        if (todaysAudit.length === 0) {
+            html += `<div>本日の削除・修正・取消はありません</div>`;
+        } else {
+            todaysAudit.forEach(function(e) {
+                html += `<div style="font-size:0.85em; margin-top:6px;">${e.timeStr} ${e.actionType} (担当: ${e.staffName})</div>`;
+                if (e.subject) html += `<div style="font-size:0.85em;">対象: ${e.subject}</div>`;
+                if (e.beforeValue) html += `<div style="font-size:0.8em;">変更前: ${e.beforeValue}</div>`;
+                if (e.afterValue) html += `<div style="font-size:0.8em;">変更後: ${e.afterValue}</div>`;
+            });
+        }
+        html += `<div class="r-divider"></div>`;
+
         if (memo) {
             html += `<div>【業務日報・メモ】</div>`;
             html += `<div>${memo.replace(/\n/g, '<br>')}</div>`;

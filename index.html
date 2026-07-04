@@ -590,9 +590,7 @@
             var idx = -1; for(var j=0; j<salesHistory.length; j++) { if(salesHistory[j].id === editingOrderId) idx = j; }
             if (idx > -1) {
                 var newItemsStr = itemsSummary.join(' / ');
-                if (salesHistory[idx].totalSales !== orderTotal || salesHistory[idx].items !== newItemsStr) {
-                    logAuditEvent('注文修正', editingOrderId, name, '¥' + salesHistory[idx].totalSales.toLocaleString() + '｜' + salesHistory[idx].items, '¥' + orderTotal.toLocaleString() + '｜' + newItemsStr, '');
-                }
+                logAuditEvent('注文修正', editingOrderId, name, '¥' + salesHistory[idx].totalSales.toLocaleString() + '｜' + salesHistory[idx].items, '¥' + orderTotal.toLocaleString() + '｜' + newItemsStr, '');
                 salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = newItemsStr;
             }
         } else {

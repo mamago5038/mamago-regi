@@ -251,6 +251,9 @@
             <div class="report-card"><div class="report-label">売掛金 (後金)</div><div class="report-val" style="color:#c0392b; font-size:1.2rem;">¥<span id="repTotalCredit">0</span></div></div>
             <div class="report-card total"><div class="report-label">④ 本日の使用タグ範囲 (自動計算)</div><div class="report-val" style="font-size:1.2rem; color:#d35400;"><span id="repTagRange">なし</span></div></div>
         </div>
+        <div class="modal-section-title">⚠️ 本日の削除・修正一覧</div>
+        <div class="history-list-box" id="auditLogContainer" style="margin-bottom:15px;"></div>
+
         <div class="modal-section-title">📝 本日の業務日報・メモ</div>
         <textarea id="reportDailyMemo" class="modal-text-input" rows="3" placeholder="例：〇〇様、次回布団の集配希望。" style="resize:none; margin-bottom:15px; font-family:inherit;"></textarea>
 
@@ -504,7 +507,28 @@
     function openCustomModal() { document.getElementById('customModal').style.display = 'flex'; }
     function closeCustomModal() { document.getElementById('customModal').style.display = 'none'; }
     function addCustomItem() { var n = document.getElementById('customItemName').value.trim() || '特殊品'; var p = parseInt(document.getElementById('customItemPrice').value); if(p >= 0) { closeCustomModal(); openQuantityModal(n, p, 'custom'); } else { alert('正しい数値を入力してください'); } }
-    function removeCart(idx) { cart.splice(idx, 1); updateDisplay(); }
+    function getTodayDateKey() { var now = new Date(); return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0'); }
+
+    function logAuditEvent(actionType, orderId, subject, beforeValue, afterValue, memo) {
+        var staff = document.getElementById('staffNameInput').value.trim() || '未設定';
+        var now = new Date();
+        var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+        var entry = { date: getTodayDateKey(), timeStr: timeStr, staffName: staff, actionType: actionType, orderId: orderId || '', subject: subject || '', beforeValue: beforeValue || '', afterValue: afterValue || '', memo: memo || '' };
+        var log = JSON.parse(localStorage.getItem('cleaning_audit_log') || '[]');
+        log.push(entry);
+        localStorage.setItem('cleaning_audit_log', JSON.stringify(log));
+        var payload = Object.assign({ reportType: 'AUDIT_LOG' }, entry);
+        if (GAS_URL && GAS_URL.indexOf("http") === 0) { fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(function(e) {}); }
+    }
+
+    function removeCart(idx) {
+        var removed = cart[idx];
+        if (removed) {
+            var custName = document.getElementById('custName').value.trim();
+            logAuditEvent('商品削除', editingOrderId, removed.name + (removed.memo ? '(' + removed.memo + ')' : ''), '¥' + removed.price.toLocaleString(), '', custName ? ('お客様: ' + custName) : '');
+        }
+        cart.splice(idx, 1); updateDisplay();
+    }
 
     function updateDisplay() {
         var list = document.getElementById('receiptList'); list.innerHTML = '';
@@ -564,7 +588,13 @@
 
         if (editingOrderId) {
             var idx = -1; for(var j=0; j<salesHistory.length; j++) { if(salesHistory[j].id === editingOrderId) idx = j; }
-            if (idx > -1) { salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = itemsSummary.join(' / '); }
+            if (idx > -1) {
+                var newItemsStr = itemsSummary.join(' / ');
+                if (salesHistory[idx].totalSales !== orderTotal || salesHistory[idx].items !== newItemsStr) {
+                    logAuditEvent('注文修正', editingOrderId, name, '¥' + salesHistory[idx].totalSales.toLocaleString() + '｜' + salesHistory[idx].items, '¥' + orderTotal.toLocaleString() + '｜' + newItemsStr, '');
+                }
+                salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = newItemsStr;
+            }
         } else {
             currentOrderId = 'ORD-' + Date.now();
             salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, region: custRegion, note: custNote, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
@@ -741,7 +771,24 @@
         });
     }
     function toggleOrderAccordion(id) { var el = document.getElementById("detail-" + id); if(el) el.classList.toggle('active'); }
-    function cancelOrder(id) { if(!confirm("取り消しますか？")) return; var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); var idx = -1; for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; } if(idx > -1) { salesHistory[idx].status = "取消"; salesHistory[idx].totalSales = 0; localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory)); var cancelPayload = { id: id, status: "取消", totalSales: 0, paymentType: "【取消】", items: "【取消】" }; if (GAS_URL && GAS_URL.indexOf("http") === 0) fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(cancelPayload) }).catch(function(e) {}); alert("取り消しました。"); renderTodayOrders(); } }
+    function cancelOrder(id) {
+        if(!confirm("取り消しますか？")) return;
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var idx = -1; for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; }
+        if (idx > -1) {
+            var original = JSON.parse(JSON.stringify(salesHistory[idx]));
+            salesHistory[idx].status = "取消"; salesHistory[idx].totalSales = 0;
+            localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
+            var cancelPayload = {
+                id: id, date: original.timeStr, staffName: original.staffName, customerName: original.customerName,
+                phone: original.phone, tagNumber: original.tagNumber, totalQty: original.totalQty, gpsLink: original.gpsLink,
+                totalSales: 0, paymentType: "【取消】", items: original.items, status: "取消"
+            };
+            if (GAS_URL && GAS_URL.indexOf("http") === 0) fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(cancelPayload) }).catch(function(e) {});
+            logAuditEvent('注文取消', id, original.customerName, '¥' + original.totalSales.toLocaleString() + '｜' + original.items, '取消', '');
+            alert("取り消しました。"); renderTodayOrders();
+        }
+    }
     function modifyOrder(id) { if(!confirm("修正しますか？")) return; var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); var idx = -1; for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; } if(idx > -1) { var tgt = salesHistory[idx]; document.getElementById('custName').value = tgt.customerName; document.getElementById('custPhone').value = tgt.phone || ''; cart = []; var itemParts = tgt.items.split(' / '); itemParts.forEach(function(part) { var cleanName = part.split('[')[0] || "特殊品"; var nameOnly = cleanName.split('(')[0] || cleanName; var memoOnly = ""; if(cleanName.indexOf('(') > -1) memoOnly = cleanName.split('(')[1].replace(')', ''); cart.push({ name: nameOnly, price: Math.floor(tgt.totalSales / tgt.totalQty), memo: memoOnly }); }); editingOrderId = id; updateDisplay(); closeTodayOrdersModal(); backToCategories(); } }
 
     function searchCustomerByPhone() { var phone = document.getElementById('custPhone').value.trim(); if (!phone) return; var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); var found = null; for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) found = customers[i]; } if (found) { document.getElementById('custName').value = found.name; document.getElementById('custRegion').value = found.region || ''; document.getElementById('custNote').value = found.note || ''; } else { alert('未登録です。'); } }
@@ -819,6 +866,26 @@
 
         document.getElementById('repTotalSales').innerText = tSales.toLocaleString(); document.getElementById('repTotalCash').innerText = tCash.toLocaleString(); document.getElementById('repTotalCredit').innerText = tCredit.toLocaleString(); document.getElementById('repCustomerCount').innerText = cCount; document.getElementById('repTotalItems').innerText = tItems;
         document.getElementById('repTagRange').innerText = tagRangeStr;
+        renderAuditLog(targetDate);
+    }
+
+    function renderAuditLog(targetDate) {
+        var container = document.getElementById('auditLogContainer');
+        var log = JSON.parse(localStorage.getItem('cleaning_audit_log') || '[]');
+        var todays = log.filter(function(e) { return e.date === targetDate; });
+        if (todays.length === 0) { container.innerHTML = '<div style="padding:10px; text-align:center; color:#999; font-size:0.85rem;">本日の削除・修正はありません</div>'; return; }
+        var html = '';
+        todays.forEach(function(e) {
+            var actionColor = e.actionType === '商品削除' ? '#c0392b' : '#e67e22';
+            html += '<div class="history-item" style="text-align:left; display:block;">'
+                + '<div style="font-size:0.8rem; color:#666;">' + e.timeStr + ' ・ 担当: ' + e.staffName + '</div>'
+                + '<div style="font-weight:bold; color:' + actionColor + ';">' + e.actionType + (e.subject ? '：' + e.subject : '') + '</div>'
+                + (e.beforeValue ? '<div style="font-size:0.85rem;">変更前: ' + e.beforeValue + '</div>' : '')
+                + (e.afterValue ? '<div style="font-size:0.85rem;">変更後: ' + e.afterValue + '</div>' : '')
+                + (e.memo ? '<div style="font-size:0.8rem; color:#888;">' + e.memo + '</div>' : '')
+                + '</div>';
+        });
+        container.innerHTML = html;
     }
 
     // ======================================================

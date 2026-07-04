@@ -660,7 +660,8 @@
     }
 
     function executeOrderSubmission(name, phone, staffName, nowStr, todayKey, confirmBtn, originalBtnText) {
-        if (phone) { var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); var existingIdx = -1; for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) existingIdx = i; } var custRegion = document.getElementById('custRegion').value.trim(); var custNote = document.getElementById('custNote').value.trim(); if (existingIdx > -1) { customers[existingIdx].name = name; if (custRegion) customers[existingIdx].region = custRegion; if (custNote) customers[existingIdx].note = custNote; } else { customers.push({ name: name, phone: phone, region: custRegion, note: custNote }); } localStorage.setItem('cleaning_customers', JSON.stringify(customers)); }
+        var custRegion = document.getElementById('custRegion').value.trim(); var custNote = document.getElementById('custNote').value.trim();
+        if (phone) { var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); var existingIdx = -1; for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) existingIdx = i; } if (existingIdx > -1) { customers[existingIdx].name = name; if (custRegion) customers[existingIdx].region = custRegion; if (custNote) customers[existingIdx].note = custNote; } else { customers.push({ name: name, phone: phone, region: custRegion, note: custNote }); } localStorage.setItem('cleaning_customers', JSON.stringify(customers)); }
         var orderTotal = 0; var itemsSummary = []; var startP = globalTagParent; var startC = globalTagChild; var finalP = startP; var finalC = startC;
         var savedCart = JSON.parse(JSON.stringify(cart));
 
@@ -683,7 +684,7 @@
         }
 
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
-        var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
+        var payload = { id: currentOrderId, status: "正常", date: nowStr, staffName: staffName, customerName: name, phone: phone, region: custRegion, note: custNote, tagNumber: tagRangeString, totalQty: cart.length, totalSales: orderTotal, paymentType: (currentPaymentType === 'now') ? '前金' : '後金(貸し)', items: itemsSummary.join(' / '), gpsLink: currentGpsLink };
         sendToGAS(payload);
 
         currentOrderData = {

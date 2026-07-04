@@ -676,11 +676,11 @@
             if (idx > -1) {
                 var newItemsStr = itemsSummary.join(' / ');
                 logAuditEvent('注文修正', editingOrderId, name, '¥' + salesHistory[idx].totalSales.toLocaleString() + '｜' + salesHistory[idx].items, '¥' + orderTotal.toLocaleString() + '｜' + newItemsStr, '');
-                salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = newItemsStr;
+                salesHistory[idx].totalSales = orderTotal; salesHistory[idx].totalQty = cart.length; salesHistory[idx].tagNumber = tagRangeString; salesHistory[idx].cashReceived = (currentPaymentType === 'now') ? orderTotal : 0; salesHistory[idx].creditAmount = (currentPaymentType === 'later') ? orderTotal : 0; salesHistory[idx].items = newItemsStr; salesHistory[idx].region = custRegion; salesHistory[idx].note = custNote; salesHistory[idx].cartItems = savedCart;
             }
         } else {
             currentOrderId = 'ORD-' + Date.now();
-            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, region: custRegion, note: custNote, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, creditSettled: false, items: itemsSummary.join(' / '), gpsLink: currentGpsLink, status: "正常" });
+            salesHistory.push({ id: currentOrderId, date: todayKey, timeStr: nowStr, customerName: name, phone: phone, staffName: staffName, region: custRegion, note: custNote, totalSales: orderTotal, totalQty: cart.length, tagNumber: tagRangeString, cashReceived: (currentPaymentType === 'now') ? orderTotal : 0, creditAmount: (currentPaymentType === 'later') ? orderTotal : 0, creditSettled: false, items: itemsSummary.join(' / '), cartItems: savedCart, gpsLink: currentGpsLink, status: "正常" });
         }
 
         localStorage.setItem('cleaning_sales_history', JSON.stringify(salesHistory));
@@ -939,7 +939,27 @@
             alert("取り消しました。"); renderTodayOrders();
         }
     }
-    function modifyOrder(id) { if(!confirm("修正しますか？")) return; var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]'); var idx = -1; for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; } if(idx > -1) { var tgt = salesHistory[idx]; document.getElementById('custName').value = tgt.customerName; document.getElementById('custPhone').value = tgt.phone || ''; cart = []; var itemParts = tgt.items.split(' / '); itemParts.forEach(function(part) { var cleanName = part.split('[')[0] || "特殊品"; var nameOnly = cleanName.split('(')[0] || cleanName; var memoOnly = ""; if(cleanName.indexOf('(') > -1) memoOnly = cleanName.split('(')[1].replace(')', ''); cart.push({ name: nameOnly, price: Math.floor(tgt.totalSales / tgt.totalQty), memo: memoOnly }); }); editingOrderId = id; updateDisplay(); closeTodayOrdersModal(); backToCategories(); } }
+    function modifyOrder(id) {
+        if(!confirm("修正しますか？")) return;
+        var salesHistory = JSON.parse(localStorage.getItem('cleaning_sales_history') || '[]');
+        var idx = -1; for(var i=0; i<salesHistory.length; i++) { if(salesHistory[i].id === id) idx = i; }
+        if(idx > -1) {
+            var tgt = salesHistory[idx];
+            document.getElementById('custName').value = tgt.customerName;
+            document.getElementById('custPhone').value = tgt.phone || '';
+            document.getElementById('custRegion').value = tgt.region || '';
+            document.getElementById('custNote').value = tgt.note || '';
+            setPaymentType(tgt.creditAmount > 0 ? 'later' : 'now');
+            cart = [];
+            if (tgt.cartItems && tgt.cartItems.length > 0) {
+                tgt.cartItems.forEach(function(item) { cart.push({ name: item.name, price: item.price, memo: item.memo || '' }); });
+            } else {
+                var itemParts = tgt.items.split(' / ');
+                itemParts.forEach(function(part) { var cleanName = part.split('[')[0] || "特殊品"; var nameOnly = cleanName.split('(')[0] || cleanName; var memoOnly = ""; if(cleanName.indexOf('(') > -1) memoOnly = cleanName.split('(')[1].replace(')', ''); cart.push({ name: nameOnly, price: Math.floor(tgt.totalSales / tgt.totalQty), memo: memoOnly }); });
+            }
+            editingOrderId = id; updateDisplay(); closeTodayOrdersModal(); backToCategories();
+        }
+    }
 
     function searchCustomerByPhone() { var phone = document.getElementById('custPhone').value.trim(); if (!phone) return; var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); var found = null; for(var i=0; i<customers.length; i++) { if(customers[i].phone === phone) found = customers[i]; } if (found) { document.getElementById('custName').value = found.name; document.getElementById('custRegion').value = found.region || ''; document.getElementById('custNote').value = found.note || ''; } else { alert('未登録です。'); } }
     function openCustomerListModal() { var cList = document.getElementById('customerListContainer'); cList.innerHTML = ''; var customers = JSON.parse(localStorage.getItem('cleaning_customers') || '[]'); if (customers.length === 0) cList.innerHTML = '<div style="padding:15px;text-align:center;color:#999;">名簿が空です</div>'; customers.forEach(function(c) { var div = document.createElement('div'); div.className = 'history-item'; div.innerHTML = '<div><strong>' + c.name + ' 様</strong></div><div>📞 ' + c.phone + '</div>'; div.onclick = function() { document.getElementById('custName').value = c.name; document.getElementById('custPhone').value = c.phone; document.getElementById('custRegion').value = c.region || ''; document.getElementById('custNote').value = c.note || ''; closeCustomerModal(); }; cList.appendChild(div); }); document.getElementById('customerModal').style.display = 'flex'; }

@@ -782,6 +782,9 @@
         html += `<div class="r-large">■ お届け予定日</div>`;
         html += `<div class="r-large" style="text-align:center; margin:5px 0;">${data.delivery} 頃</div><br>`;
         html += `<div class="r-center">ありがとうございました！</div>`;
+        html += `<div class="r-divider"></div>`;
+        html += `<div class="r-center" style="font-size:11px;">〒037-0014 青森県五所川原市大字七ツ館字虫流156-45</div>`;
+        html += `<div class="r-center" style="font-size:11px;">フリーダイヤル: 0120-569-887</div>`;
         html += `<div class="r-center">=========================</div>`;
 
         area.innerHTML = html;
@@ -1176,6 +1179,8 @@
             '<div style="border-top:1px solid #ccc;margin:8px 0;"></div>' +
             '<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-top:8px;"><span>発行日</span><span>' + dateStr + '</span></div>' +
             '<div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span>発行者</span><span style="font-weight:bold;">株式会社クリーニングのママ号</span></div>' +
+            '<div style="text-align:center;font-size:0.65rem;margin-top:10px;color:#444;">〒037-0014 青森県五所川原市大字七ツ館字虫流156-45</div>' +
+            '<div style="text-align:center;font-size:0.65rem;color:#444;">フリーダイヤル: 0120-569-887</div>' +
             '</div>';
     }
 
@@ -1195,6 +1200,8 @@
             '<div class="r-divider"></div>' +
             '<div class="r-flex" style="margin-top:12px;font-size:12px;"><span>発行日</span><span>' + dateStr + '</span></div>' +
             '<div class="r-flex" style="font-size:12px;"><span>発行者</span><span style="font-weight:bold;">株式会社クリーニングのママ号</span></div>' +
+            '<div class="r-center" style="font-size:11px;margin-top:10px;">〒037-0014 青森県五所川原市大字七ツ館字虫流156-45</div>' +
+            '<div class="r-center" style="font-size:11px;">フリーダイヤル: 0120-569-887</div>' +
             '</div>';
         window.print();
     }

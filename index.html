@@ -391,7 +391,8 @@
     }
     function syncTagCounterWithServer() {
         if (!(GAS_URL && GAS_URL.indexOf("http") === 0)) return;
-        fetch(GAS_URL + '?action=getLastTag').then(function(res) { return res.json(); }).then(function(data) {
+        var staffName = document.getElementById('staffNameInput').value.trim() || '未設定';
+        fetch(GAS_URL + '?action=getLastTag&staffName=' + encodeURIComponent(staffName)).then(function(res) { return res.json(); }).then(function(data) {
             var pos = parseLastTagPos(data.lastTag);
             if (!pos) return;
             var nextP = pos.p, nextC = pos.c + 1;

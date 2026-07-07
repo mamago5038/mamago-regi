@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ママ号レジ">
+    <meta name="theme-color" content="#4a7c59">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -1258,6 +1261,14 @@
             sendToGAS(reportPayload);
             alert("本日（" + targetDate + "）の集計データを送信しました！"); closeReportModal();
         } else { alert("※URLが設定されていません"); closeReportModal(); }
+    }
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('service-worker.js').catch(function(e) {
+                console.warn('Service Worker登録失敗', e);
+            });
+        });
     }
 </script>
 </body>
